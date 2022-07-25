@@ -12,22 +12,22 @@ Original project "Variabilitectron" created by Damien Wojtowicz. See previous ve
 https://framagit.org/DWojtowicz/Variabilitectron
 https://framagit.org/InesPM/Variabilitectron
 
+
 ## Tutorial
 
 Let's set the path to where the scripts are located and where we want to store our data, for instance
-bash $SCRIPTS/exod_analysis.sh -o $obs -f $FOLDER -s $SCRIPTS
+
 ```
 SCRIPTS=/path/EXOD/scripts
 FOLDER=/path/data
 ```
 
-One can use the `run_exodus.sh` script to download, filter and compute the variability with four sets of parameters. Let's try, for instance, with observation 0652250701:
+One can use the `run_exodus.sh` script to download, filter and compute the variability for a list of observations. Let's try, for instance, with observation 0652250701, and (see the obs_ids.txt in the examples folder):
 
 ```
 bash run_exodus.sh -obs_id_file obs_ids.txt -lc_enable false -iterative_det_level false
 ```
-The whole process should take a few minutes, and it depends on the duration of the observation.
-An example of the output of these commands can be found in the folder `examples`.
+The whole process should take a few minutes. An example of the output of these commands can be found in the folder `examples`.
 
 As the render_all.py output shows, one variable source has been detected with TW=100 s, DL=8, bs=3.
 

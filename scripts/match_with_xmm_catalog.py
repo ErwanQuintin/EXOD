@@ -78,14 +78,6 @@ with open('triple_match.csv','r') as csvinput:
         row = next(reader)
         row.append('EXOD_RA')
         row.append('EXOD_DEC')
-        row.append('EXOD_RA_MEDIAN')
-        row.append('EXOD_DEC_MEDIAN')
-        row.append('EXOD_PN_SEP')
-        row.append('EXOD_M1_SEP')
-        row.append('EXOD_M2_SEP')
-        row.append('EXOD_PN_SEP_MED')
-        row.append('EXOD_M1_SEP_MED')
-        row.append('EXOD_M2_SEP_MED')
         row.append('XMM_RA')
         row.append('XMM_DEC')
         row.append('EXOD_XMM_SEP')
@@ -104,77 +96,19 @@ with open('triple_match.csv','r') as csvinput:
             obj_class= row[col_no_type]
             center_ra = '-'
             center_dec = '-'
-            center_pn_sep = '-'
-            center_m1_sep = '-'
-            center_m2_sep = '-'
-            center_ra_med = '-'
-            center_dec_med = '-'
-            center_pn_sep_med = '-'
-            center_m1_sep_med = '-'
-            center_m2_sep_med = '-'
             if(row[col_no_type] == "T"):
                 center_ra = str( ((float(pn_ra) + float(m1_ra) + float(m2_ra) )/3.0))
                 center_dec = str(((float(pn_dec) + float(m1_dec) + float(m2_dec)) / 3.0))
-                c1 = SkyCoord(float(center_ra), float(center_dec), frame='fk5', unit='deg')
-                c2 = SkyCoord(float(pn_ra), float(pn_dec), frame='fk5', unit='deg')
-                sep = c1.separation(c2)
-                center_pn_sep = str(round(sep.arcsecond, 2))
-                c2 = SkyCoord(float(m1_ra), float(m1_dec), frame='fk5', unit='deg')
-                sep = c1.separation(c2)
-                center_m1_sep = str(round(sep.arcsecond, 2))
-                c2 = SkyCoord(float(m2_ra), float(m2_dec), frame='fk5', unit='deg')
-                sep = c1.separation(c2)
-                center_m2_sep = str(round(sep.arcsecond, 2))
-
-                center_ra_med = str( (np.median([float(pn_ra) , float(m1_ra) , float(m2_ra)]) ))
-                center_dec_med =  str( (np.median([float(pn_dec) , float(m1_dec) , float(m2_dec)]) ))
-                c1 = SkyCoord(float(center_ra_med), float(center_dec_med), frame='fk5', unit='deg')
-                c2 = SkyCoord(float(pn_ra), float(pn_dec), frame='fk5', unit='deg')
-                sep = c1.separation(c2)
-                center_pn_sep_med = str(round(sep.arcsecond, 2))
-                c2 = SkyCoord(float(m1_ra), float(m1_dec), frame='fk5', unit='deg')
-                sep = c1.separation(c2)
-                center_m1_sep_med = str(round(sep.arcsecond, 2))
-                c2 = SkyCoord(float(m2_ra), float(m2_dec), frame='fk5', unit='deg')
-                sep = c1.separation(c2)
-                center_m2_sep_med = str(round(sep.arcsecond, 2))
-
             if(row[col_no_type] == "D"):
                 if(m2_ra =="-"):
                     center_ra = str( ((float(pn_ra) + float(m1_ra)  )/2.0))
                     center_dec = str(((float(pn_dec) + float(m1_dec) ) / 2.0))
-                    c1 = SkyCoord(float(center_ra), float(center_dec), frame='fk5', unit='deg')
-                    c2 = SkyCoord(float(pn_ra), float(pn_dec), frame='fk5', unit='deg')
-                    sep = c1.separation(c2)
-                    center_pn_sep = str(round(sep.arcsecond, 2))
-                    c2 = SkyCoord(float(m1_ra), float(m1_dec), frame='fk5', unit='deg')
-                    sep = c1.separation(c2)
-                    center_m1_sep = str(round(sep.arcsecond, 2))
                 if(m1_ra =="-"):
                     center_ra = str( ((float(pn_ra) + float(m2_ra)  )/2.0))
                     center_dec = str(((float(pn_dec) + float(m2_dec) ) / 2.0))
-                    c1 = SkyCoord(float(center_ra), float(center_dec), frame='fk5', unit='deg')
-                    c2 = SkyCoord(float(pn_ra), float(pn_dec), frame='fk5', unit='deg')
-                    sep = c1.separation(c2)
-                    center_pn_sep = str(round(sep.arcsecond, 2))
-                    c2 = SkyCoord(float(m2_ra), float(m2_dec), frame='fk5', unit='deg')
-                    sep = c1.separation(c2)
-                    center_m2_sep = str(round(sep.arcsecond, 2))
                 if(pn_ra =="-"):
                     center_ra = str( ((float(m1_ra) + float(m2_ra)  )/2.0))
                     center_dec = str(((float(m1_dec) + float(m2_dec) ) / 2.0))
-                    c1 = SkyCoord(float(center_ra), float(center_dec), frame='fk5', unit='deg')
-                    c2 = SkyCoord(float(m1_ra), float(m1_dec), frame='fk5', unit='deg')
-                    sep = c1.separation(c2)
-                    center_m1_sep = str(round(sep.arcsecond, 2))
-                    c2 = SkyCoord(float(m2_ra), float(m2_dec), frame='fk5', unit='deg')
-                    sep = c1.separation(c2)
-                    center_m2_sep = str(round(sep.arcsecond, 2))
-                center_ra_med = center_ra
-                center_dec_med = center_dec
-                center_pn_sep_med = center_pn_sep
-                center_m1_sep_med = center_m1_sep
-                center_m2_sep_med = center_m2_sep
             if(row[col_no_type] == "S"):
                 if(m2_ra !="-"):
                     center_ra = m2_ra
@@ -185,24 +119,11 @@ with open('triple_match.csv','r') as csvinput:
                 if(pn_ra !="-"):
                     center_ra = pn_ra
                     center_dec = pn_dec
-                center_ra_med = center_ra
-                center_dec_med = center_dec
-                center_pn_sep_med = center_pn_sep
-                center_m1_sep_med = center_m1_sep
-                center_m2_sep_med = center_m2_sep
 
 
             split_row = re.split(' ', row[0])
             row.append(center_ra)
             row.append(center_dec)
-            row.append(center_ra_med)
-            row.append(center_dec_med)
-            row.append(center_pn_sep)
-            row.append(center_m1_sep)
-            row.append(center_m2_sep)
-            row.append(center_pn_sep_med)
-            row.append(center_m1_sep_med)
-            row.append(center_m2_sep_med)
             iterator =0
             closest_sep=-1
             closest_ra="NA"
@@ -247,14 +168,14 @@ with open('triple_match.csv','r') as csvinput:
                 row.append(closest_ra)
                 row.append(closest_dec)
                 row.append(str(round(closest_sep,2)))
-                row.append(closest_src_id)
+                row.append("XMM" +str(closest_src_id))
                 row.append(closest_flux)
                 row.append(closest_var_flag)
             else:
                 row.append(closest_ra)
                 row.append(closest_dec)
                 row.append(str(round(closest_sep,2)))
-                row.append(closest_src_id)
+                row.append("XMM" +str(closest_src_id))
                 row.append(closest_flux)
                 row.append(closest_var_flag)
             all.append(row)

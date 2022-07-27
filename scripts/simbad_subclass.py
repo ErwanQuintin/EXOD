@@ -97,13 +97,13 @@ dic_classifier = {'': '',
 
                   }
 
-simbad_col_no=32
+simbad_col_no=24
 
 
 # Read in existing table and append additional column with this class
 
 with open('triple_match_obs_sim.csv','r') as csvinput:
-    with open('triple_match_obs_sim_classified.csv', 'w') as csvoutput:
+    with open('exodus_results.csv', 'w') as csvoutput:
         writer = csv.writer(csvoutput, lineterminator='\n')
         reader = csv.reader(csvinput)
 

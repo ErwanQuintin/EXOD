@@ -1,0 +1,3 @@
+Source     =  (X,Y) in CIRCLE(27593.2,27096.1,580)
+Background = (X,Y) in CIRCLE(28791.6,24960.7,580)
+Total time = 212

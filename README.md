@@ -6,7 +6,8 @@ This is done by computing the variability of each pixel of the detector instead 
 
 We encourage the potential users to read the users guide (EXOD_users_guide.pdf), and especially follow the tutorial presented in section 6.
 
-If you use EXOD for your research, please acknowledge it by citing <a href="https://www.aanda.org/articles/aa/full_html/2020/08/aa36869-19/aa36869-19.html" target="_blank">Pastor-Marazuela et al (2020)</a> and Gupta & Webb (in prep).
+If you use EXODUS for your research, please acknowledge it by citing Gupta & Webb (in prep). Original project "Variabilitectron" created by Damien Wojtowicz and then "EXOD" was created by <a href="https://www.aanda.org/articles/aa/full_html/2020/08/aa36869-19/aa36869-19.html" target="_blank">Pastor-Marazuela et al (2020)</a>.
+
 
 Original project "Variabilitectron" created by Damien Wojtowicz. See previous versions:
 https://framagit.org/DWojtowicz/Variabilitectron

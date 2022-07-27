@@ -17,18 +17,18 @@
 
 # Default variables
 LC_ENABLE=false	# by default do not generate light curves
-ITERATIVE_DET_LEVEL=false
+ITERATIVE_DET_LEVEL=true
+OBS_ID_FILE=single_obsid.txt
 
-# Input variables
-while [[ $# -gt 0 ]]; do
-case "$1" in
-  --obs_id_file|-obs)          OBS_ID_FILE=${2}
-  shift; shift ;;
-  --lc_enable|-lc)            LC_ENABLE=${2:-$LC_ENABLE}
-  shift; shift ;;
-  --iterative_det_level|-it)  ITERATIVE_DET_LEVEL=${2:-$ITERATIVE_DET_LEVEL}
-esac
+while getopts o:l:i: flag
+do
+    case "${flag}" in
+        o) OBS_ID_FILE=${OPTARG};;
+        l) LC_ENABLE=${OPTARG};;
+        i) ITERATIVE_DET_LEVEL=${OPTARG};;
+    esac
 done
+
 
 echo -e "\tOBS_ID_FILE = ${OBS_ID_FILE}"
 echo -e "\tLC_ENABLE  = ${LC_ENABLE}"
@@ -217,6 +217,6 @@ python3 $SCRIPTS/simbad_subclass.py
 
 
 # clean up any residual files for future run
-rm -rf  Master_Catalogue.csv match_countM1.txt match_countM2.txt  match_count_pn.txt  match_countPN.txt  separation_file.csv triple_match.csv  triple_match_obs.csv  
+rm -rf  Master_Catalogue.csv match_countM1.txt match_countM2.txt  match_count_pn.txt  match_countPN.txt  separation_file.csv triple_match.csv  triple_match_obs.csv triple_match_non_bright.csv triple_match_obs_sim.csv
 echo Post process done
    

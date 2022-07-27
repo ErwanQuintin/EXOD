@@ -8,7 +8,6 @@
 # DETECTOR main programme                                              #
 #                                                                      #
 # Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com      #
 #                                                                      #
 ########################################################################
 """

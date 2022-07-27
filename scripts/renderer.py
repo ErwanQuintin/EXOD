@@ -8,7 +8,6 @@
 # RENDERER functions to be used with the DETECTOR                      #
 #                                                                      #
 # Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-# Inés Pastor Marazuela (2018) - ines.pastor.marazuela@gmail.com      #
 #                                                                      #
 ########################################################################
 """

@@ -8,7 +8,6 @@
 # Rendering for exodus program                                         #
 #                                                                      #
 # Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-# Florent Castellani (2020) - castellani.flo@gmail.com                 #
 #                                                                      #
 ########################################################################
 """

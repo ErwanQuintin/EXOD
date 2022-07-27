@@ -32,16 +32,15 @@ import argparse
 #                                                                      #
 ########################################################################
 #
-#####parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
 #
-#####parser.add_argument("-path", help="Path to the folder containing the XMM catalog", type=str)
+parser.add_argument("-path", help="Path to the folder containing the XMM catalog", type=str)
 
-#####args = parser.parse_args()
+args = parser.parse_args()
 
-#####fits_image_filename = "4XMM_DR11cat_v1.0.fits"
-#####fits_image_filename= args.path + "/" + fits_image_filename
+fits_image_filename = "4XMM_DR11cat_v1.0.fits"
+fits_image_filename= args.path + "/" + fits_image_filename
 
-fits_image_filename = "../../4XMM_DR11cat_v1.0.fits/4XMM_DR11cat_v1.0.fits"
 
 
 hdul = fits.open(fits_image_filename)

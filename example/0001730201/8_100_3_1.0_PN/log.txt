@@ -1,0 +1,56 @@
+ Recovering the events list	    0.01 s
+ Extracting data		   19.56 s
+ Computing variability		   35.46 s
+ Detecting variable sources	   53.96 s
+
+	Median		1.0
+	Box counts	72.0
+center x =  26 center y =  167
+file util call x=  26  Y =  167  CCD num =  4
+['' 'sasversion:- Executing (routine): sasversion  -w 1 -V 4'
+ 'sasversion:- sasversion (sasversion-1.3)  [xmmsas_20210526_1931-20.0.0] started:  2022-07-27T20:13:43.000'
+ 'sasversion:- XMM-Newton SAS release and build information:' ''
+ 'SAS release: xmmsas_20210526_1931-20.0.0'
+ 'Compiled on: Sun May 30 16:28:39 UTC 2021' 'Compiled by: filippos@bell'
+ 'Platform   : Ubuntu20.04' ''
+ 'SAS-related environment variables that are set:' ''
+ 'SAS_DIR = /home/filippos/SASscreeningDR11'
+ 'SAS_PATH = /home/filippos/SASscreeningDR11'
+ 'SAS_CCFPATH = /home/filippos/sasbuild/ccf/pub'
+ 'SAS_CCF = /mnt/data/Maitrayee/EXOD/data/0001730201/ccf.cif'
+ 'SAS_ODF = /mnt/data/Maitrayee/EXOD/data/0001730201/' ''
+ 'sasversion:- sasversion (sasversion-1.3)  [xmmsas_20210526_1931-20.0.0] ended:    2022-07-27T20:13:43.000'
+ '' 'Do not forget to define SAS_CCFPATH, SAS_CCF and SAS_ODF' ''
+ '# Variable source 1' '# Instrument: EPN' '# RA (deg)   DEC (deg)'
+ '263.6925   -32.5549' '#' '# rawX      rawY    ccd   On chip?'
+ '  26.00    167.00    4      T' '#' '# detX         detY'
+ '   1035.86      1703.78' '#' '# Image X    Y pixel'
+ '  298.29     325.51' '#' '# Sky X        Y pixel'
+ '  23823.79     26000.95' '                                      ' '']
+# Variable source 1
+# Instrument: EPN
+# RA (deg)   DEC (deg)
+263.6925   -32.5549
+#
+# rawX      rawY    ccd   On chip?
+  26.00    167.00    4      T
+#
+# detX         detY
+   1035.86      1703.78
+#
+# Image X    Y pixel
+  298.29     325.51
+#
+# Sky X        Y pixel
+  23823.79     26000.95
+                                      
+
+RA =  263.6925  DEC =  -32.5549
+x =  23823.79  Y=  26000.95
+raw x =  26  raw Y=  167
+here at check_multiple_sources
+	Nb of sources	1
+
+ Rendering variability image	   55.21 s
+ # Total execution time OBS 0001730201 : 65.56 s
+

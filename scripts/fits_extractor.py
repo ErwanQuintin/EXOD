@@ -4,10 +4,12 @@
 
 ########################################################################
 #                                                                      #
-# EXOD - EPIC-pn XMM-Newton Outburst Detector                          # #                                                                      #
+# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           # 
+#                                                                      #
 # DETECTOR utilities                                                   #
 #                                                                      #
-# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com       #
+# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
+# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com      #
 #                                                                      #
 ########################################################################
 """
@@ -41,24 +43,26 @@ def extraction_photons(events_file):
     @raise Exception: An exception from astropy if something went wrong
     """
 
-    # Ouverture du fichier
     hdulist = fits.open(events_file)
 
-    # Récupération des EVENTS
     events = hdulist[1].data
     header = hdulist[1].header
+    inst = header['INSTRUME']
+    if inst == 'EPN' :
+        ccdnb = 12
+    elif inst == 'EMOS1' or 'EMOS2' :
+        ccdnb = 7
+    
     events_filtered = []
-    for i in range(12) :
+    for i in range(ccdnb) :
         events_filtered.append([])
-
 
     for evt in events :
         events_filtered[int(evt['CCDNR'])-1].append(evt)
 
-
     hdulist.close()
     events_filtered_sorted = []
-    for i in range(12) :
+    for i in range(ccdnb) :
         events_filtered_sorted.append(sorted(events_filtered[i], key=lambda k: int(k['TIME'])))
 
     return events_filtered_sorted, header
@@ -111,7 +115,6 @@ def fits_writer(data, sources, image, pars, file) :
     head_var_f.append(card=('DL', pars['DL'], 'EXOD Detection level'))
     head_var_f.append(card=('BS', pars['BS'], '[pix] EXOD Box size'))
 
-    # data_var_f = Table(names=('VARIABILITY', 'RAWX', 'RAWY', 'CCDNR'), dtype=('f8', 'i2', 'i2', 'i2'))
 
     # Creating fits file
     hdul_f   = fits.HDUList()

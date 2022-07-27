@@ -3,10 +3,12 @@
 
 ########################################################################
 #                                                                      #
-# EXOD - EPIC-pn XMM-Newton Outburst Detector                          # #                                                                      #
+# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
+#                                                                      #
 # Various utilities for both detector and renderer                     #
 #                                                                      #
-# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com       #
+# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
+# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com      #
 #                                                                      #
 ########################################################################
 """
@@ -16,7 +18,6 @@ Various resources for both detector and renderer
 # Built-in imports
 
 import sys
-sys.path.append('/usr/local/lib/python2.7/dist-packages/skimage')
 import os
 import time
 from functools import partial
@@ -30,7 +31,7 @@ from astropy import wcs
 from astropy.io import fits
 import numpy as np
 import scipy.ndimage as nd
-import skimage
+import skimage.transform
 
 # Internal imports
 
@@ -68,6 +69,7 @@ def open_files(folder_name) :
     log_file = None
     var_file = None
     reg_file = None
+    best_match_file = None
 
     # Creating the log file
     try:
@@ -76,7 +78,7 @@ def open_files(folder_name) :
     except IOError as e:
         print("Error in creating log.txt.\nABORTING", file=sys.stderr)
         print(e, file=sys.stderr)
-        close_files(log_file, var_file, reg_file)
+        close_files(log_file, var_file, reg_file, best_match_file)
         print_help()
         exit(-1)
 
@@ -87,7 +89,7 @@ def open_files(folder_name) :
     except IOError as e:
         print("Error in creating {0}.\nABORTING".format(FileNames.VARIABILITY), file=sys.stderr)
         print(e, file=sys.stderr)
-        close_files(log_file, var_file, reg_file)
+        close_files(log_file, var_file, reg_file, best_match_file)
         print_help()
         exit(-1)
 
@@ -98,26 +100,41 @@ def open_files(folder_name) :
     except IOError as e:
         print("Error in creating {0}.\nABORTING".format(FileNames.REGION), file=sys.stderr)
         print(e, file=sys.stderr)
-        close_files(log_file, var_file, reg_file)
+        close_files(log_file, var_file, reg_file, best_match_file)
+        print_help()
+        exit(-1)
+        
+        
+        # Creating the best match file to store the best matches from SIMBAD
+    try :
+        best_match_file = folder_name + FileNames.BEST_MATCH
+
+    except IOError as e:
+        print("Error in creating {0}.\nABORTING".format(FileNames.BEST_MATCH), file=sys.stderr)
+        print(e, file=sys.stderr)
+        close_files(log_file, var_file, reg_file, best_match_file)
         print_help()
         exit(-1)
 
-    return log_file, var_file, reg_file
+    return log_file, var_file, reg_file, best_match_file
 
 
 ########################################################################
 
 
-def close_files(log_f, reg_f) :
+def close_files(log_f, var_f, reg_f, bes_match_f ) :
     """
     Function closing all files.
     """
 
     if log_f :
         log_f.close()
+        
+    #if var_f :
+    #    var_f.close()
 
-    if reg_f :
-        reg_f.close()
+    #if reg_f :
+    #    reg_f.close()
 
 ########################################################################
 
@@ -190,6 +207,7 @@ class Source(object):
 
     Attributes:\n
     id_src:  The identifier number of the source\n
+    inst:    The type of CCD\n
     ccd:     The CCD where the source was detected at\n
     rawx:    The x coordinate on the CCD\n
     rawy:    The y coordinate on the CCD\n
@@ -203,6 +221,7 @@ class Source(object):
         Constructor for Source class. Computes the x and y attributes.
         @param src : source, output of variable_sources_position
             id_src:  The identifier number of the source
+            inst:    The type of CCD
             ccd:     The CCD where the source was detected at
             rawx:    The x coordinate on the CCD
             rawy:    The y coordinate on the CCD
@@ -211,16 +230,28 @@ class Source(object):
         super(Source, self).__init__()
 
         self.id_src = src[0]
-        self.ccd = src[1]
-        self.rawx = src[2]
-        self.rawy = src[3]
-        self.rawr = src[4]
+        self.inst = src[1]
+        self.ccd = src[2]
+        self.rawx = src[3]
+        self.rawy = src[4]
+        self.rawr = src[5]
+        self.vcount = src[6]
         self.x = None
         self.y = None
         self.skyr = self.rawr * 64
         self.ra = None
         self.dec = None
         self.r = self.skyr * 0.05 # arcseconds
+        self.var_rawx = src[3] + 3 # 1.5 # 3
+        self.var_rawy = src[4] + 3 # 1.5 # 3
+        self.var_rawr = src[5]
+        self.var_x = None
+        self.var_y = None
+        self.var_skyr = self.rawr * 64
+        self.var_ra = None
+        self.var_dec = None
+        self.var_r = self.skyr * 0.05 # arcseconds
+        
 
 
     def sky_coord(self, path, img, log_f) :
@@ -228,46 +259,53 @@ class Source(object):
         Calculate sky coordinates with the sas task edet2sky.
         Return x, y, ra, dec
         """
-
-        # Launching SAS commands, writing to output file
-        out_file = path + 'variable_sources.txt'
-        # The out_file will be temporarily written to the output directory, then removed.
-
-        if self.id_src == 0 : s = '>'
-        else :      s = '>>'
-
-        command = """
+        print("file util call x= " , self.rawx, " Y = ", self.rawy, " CCD num = " , self.ccd);
+        # Launching SAS commands
+        command = f"""
         export SAS_ODF={path};
         export SAS_CCF={path}ccf.cif;
         export HEADAS={FileNames.HEADAS};
         . $HEADAS/headas-init.sh;
         . {FileNames.SAS};
-        echo "# Variable source {self.id_src}"; #{s} {out_file};
-        edet2sky datastyle=user inputunit=raw X={self.rawx} Y={self.rawy} ccd={self.ccd} calinfoset={img} -V 0 {s} {out_file}
+        echo "# Variable source {self.id_src}";
+        edet2sky datastyle=user inputunit=raw X={self.rawx} Y={self.rawy} ccd={self.ccd} calinfoset={img} -V 0
         """
 
-        # Running command, writing to file
+        # Running command
         process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-        #log_f.write('\n * Source position *\n')
-        log_f.write(" * Variable source {0} * ".format(self.id_src))
-        time.sleep(0.5)
-        with open(out_file) as f:
-            for line in f:
-                log_f.write(line)
+        
+        # Extracting the output
+        try:
+            outs, errs = process.communicate(timeout=15)
+        except TimeoutExpired:
+            process.kill()
+            outs, errs = process.communicate()
+   
+        # Converting output in utf-8
+        textout=outs.decode('utf8')
+        # Splitting for each line
+        txt=textout.split("\n")
+        # Converting in numpy array
+        det2sky = np.array(txt)
+        print(det2sky)
+        
+        # Writing the results in log file
+        # Finding the beginning of the text to write in log
+        deb = np.where(det2sky == 'Do not forget to define SAS_CCFPATH, SAS_CCF and SAS_ODF')[0][0] + 2
+        #Writing in log file
+        for line in txt[deb:]:
+            log_f.write(line + "\n")
 
-        # Reading
-        det2sky = np.array([line.rstrip('\n') for line in open(out_file, 'r')])
+        # Equatorial coordinates
+        self.ra, self.dec = det2sky[np.where(det2sky == '# RA (deg)   DEC (deg)')[0][0] + 1].split()
+        
+        print("RA = " , self.ra, " DEC = ", self.dec)
 
-        for i in range(len(det2sky)) :
-            # Equatorial coordinates
-            self.ra, self.dec = det2sky[np.where(det2sky == '# RA (deg)   DEC (deg)')[0][0] + 1].split()
-
-            # Sky pixel coordinates
-            self.x, self.y    = det2sky[np.where(det2sky == '# Sky X        Y pixel')[0][0] + 1].split()
-
-        # Removing temporary output file
-        os.remove(out_file)
-
+        # Sky pixel coordinates
+        self.x, self.y    = det2sky[np.where(det2sky == '# Sky X        Y pixel')[0][0] + 1].split()
+        print ( "x = ", self.x , " Y= " , self.y)
+        print ( "raw x = ", self.rawx , " raw Y= " , self.rawy)
+	
 ########################################################################
 
 
@@ -289,9 +327,9 @@ def read_sources_from_file(file_path, comment_token='#', separator=';') :
 
 ########################################################################
 
-def ccd_config(data_matrix) :
+def PN_config(data_matrix) :
     """
-    Arranges the variability data
+    Arranges the variability data for EPIC_PN
     """
     data_v = []
 
@@ -310,12 +348,56 @@ def ccd_config(data_matrix) :
     return data_v
 
 ########################################################################
+
+def M1_config(data_matrix) :
+    """
+    Arranges the variability data for EPIC_MOS_1
+    """
+    corner = np.zeros((300,600))
+    
+    # First part
+    data_1 = np.concatenate((corner,data_matrix[1].T,np.flip(data_matrix[6].T),corner), axis=0)
+    
+    # Second part
+    data_2 = np.concatenate((data_matrix[2].T,np.flipud(data_matrix[0]),np.flip(data_matrix[5].T)), axis=0)
+    
+    # Third part
+    data_3 = np.concatenate((corner,data_matrix[3].T,np.flip(data_matrix[4].T),corner), axis=0)
+
+    # Building data matrix
+    data_v = np.rot90(np.concatenate((data_1, data_2, data_3), axis=1))
+        
+    return data_v
+
+########################################################################
+
+def M2_config(data_matrix) :
+    """
+    Arranges the variability data for EPIC_MOS_2
+    """
+    corner = np.zeros((300,600))
+    
+    # First part
+    data_1 = np.concatenate((corner,data_matrix[1].T,np.flip(data_matrix[6].T),corner), axis=0)
+    
+    # Second part
+    data_2 = np.concatenate((data_matrix[2].T,np.flipud(data_matrix[0]),np.flip(data_matrix[5].T)), axis=0)
+    
+    # Third part
+    data_3 = np.concatenate((corner,data_matrix[3].T,np.flip(data_matrix[4].T),corner), axis=0)
+
+    # Building data matrix
+    data_v = np.flip(np.concatenate((data_1, data_2, data_3), axis=1))
+        
+    return data_v
+
+########################################################################
 #                                                                      #
 # Geometrical transformations                                          #
 #                                                                      #
 ########################################################################
 
-def data_transformation(data, header) :
+def data_transformation_PN(data, header) :
     """
     Performing geometrical transformations from raw coordinates to sky coordinates
     @param data: variability matrix
@@ -325,7 +407,6 @@ def data_transformation(data, header) :
 
     # Header information
     angle = header['PA_PNT']
-    dlim = [header['REFXLMIN'], header['REFXLMAX'], header['REFYLMIN'], header['REFYLMAX']]
 
     xproj = [float(header['TDMIN6']), float(header['TDMAX6'])] # projected x limits
     yproj = [float(header['TDMIN7']), float(header['TDMAX7'])] # projected y limits
@@ -347,6 +428,49 @@ def data_transformation(data, header) :
     dataR = np.flipud(nd.rotate(data, angle, reshape = True))
     ## Resizing
     dataT = skimage.transform.resize(dataR, (pixY, pixX), mode='constant', cval=0.0) # xy reversed
+    ## Padding
+    dataP = np.pad(dataT, (padY, padX), 'constant', constant_values=0) # xy reversed
+
+    return dataP
+
+########################################################################
+
+def data_transformation_MOS(data, header) :
+    """
+    Performing geometrical transformations from raw coordinates to sky coordinates
+    @param data: variability matrix
+    @param header: header of the clean events file
+    @return: transformed variability data
+    """
+
+    # Header information
+    angle = header['PA_PNT']
+
+    xproj = [float(header['TDMIN6']), float(header['TDMAX6'])] # projected x limits
+    yproj = [float(header['TDMIN7']), float(header['TDMAX7'])] # projected y limits
+    xlims = [float(header['TLMIN6']), float(header['TLMAX6'])] # legal x limits
+    ylims = [float(header['TLMIN7']), float(header['TLMAX7'])] # legal y limits
+
+    # scaling factor
+    sx = 648 / (xlims[1] - xlims[0])
+    sy = 648 / (ylims[1] - ylims[0])
+    
+    # pads (padding)
+    interX = (int((xproj[0] - xlims[0])*sx), int((xlims[1] - xproj[1])*sx))
+    interY = (int((yproj[0] - ylims[0])*sy), int((ylims[1] - yproj[1])*sy))
+    
+    # adding pad according to MOS image pix (i.e: 500x500 pix)
+    numX = int((148-(interX[0] + interX[1]))/2)
+    numY = int((148-(interY[0] + interY[1]))/2)
+    
+    padX = (interX[0]+numX, 148-(interX[0]+numX))
+    padY = (interY[0]+numY, 148-(interY[0]+numY))
+
+    # Transformations
+    ## Rotation
+    dataR = np.flipud(nd.rotate(data, angle, reshape = False))
+    ## Resizing (MOS image are based on 500x500 pix)
+    dataT = skimage.transform.resize(dataR, (500, 500), mode='constant', cval=0.0)
     ## Padding
     dataP = np.pad(dataT, (padY, padX), 'constant', constant_values=0) # xy reversed
 

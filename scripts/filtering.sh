@@ -2,11 +2,12 @@
 
 ########################################################################
 #                                                                      #
-# EXOD - EPIC-pn XMM-Newton Outburst Detector                          #
+# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
 #                                                                      #
 # Events file filtering                                                #
 #                                                                      #
-# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com       #
+# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
+# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com      #
 #                                                                      #
 ########################################################################
 
@@ -15,8 +16,9 @@
 ###
 
 # Default variables
-RATE=0.5
-FOLDER=/mnt/data/Ines/DR5
+RATE=0.5	# (PN Rate = 0.5 and MOS Rate = 0.4)
+FOLDER=/home/mike/sas/xmmsas_20210317_1624/EXOD/data
+SCRIPTS=/home/mike/sas/xmmsas_20210317_1624/EXOD/scripts
 INST=PN
 
 # Input variables
@@ -99,34 +101,13 @@ if [ ! -f $path/ccf.cif ]; then cifbuild; fi
 title "Cleaning events file"
 
 # File names
-if [ "$INST" == "PN" ]; then
-  org_file=$(ls $path/*${OBS}PN*PIEVLI*)
-  clean_file=$path/$(var CLEAN_FILE)
-  gti_file=$path/$(var GTI_FILE)
-  img_file=$path/$(var IMG_FILE)
-  rate_file=$path/$(var RATE_FILE)
-  l=P
 
-elif [ "$INST" == "M1" ]; then
-  org_file=$(ls $path/*${OBS}M1*MIEVLI*)
-  clean_file=$path/M1_clean.fits
-  gti_file=$path/$(var GTI_FILE)
-  img_file=$path/M1_image.fits
-  rate_file=$path/$(var RATE_FILE)
-  l=M
+org_file=$(ls $path/*${OBS}${INST}*IEVLI*)
+clean_file=$path/${INST}_clean.fits
+gti_file=$path/${INST}_gti.fits
+img_file=$path/${INST}_image.fits
+rate_file=$path/${INST}_rate.fits
 
-elif [ "$INST" == "M2" ]; then
-  org_file=$(ls $path/*${OBS}M2*MIEVLI*)
-  clean_file=$path/M2_clean.fits
-  gti_file=$path/$(var GTI_FILE)
-  img_file=$path/M2_image.fits
-  rate_file=$path/$(var RATE_FILE)
-  l=M
-
-else
-  echo "ERROR: Instrument not recognized"
-  exit
-fi
 
 echo -e "\tRAW FILE   = ${org_file}"
 echo -e "\tCLEAN FILE = ${clean_file}"
@@ -135,29 +116,47 @@ echo -e "\tIMAGE FILE = ${img_file}"
 echo -e "\tRATE FILE  = ${rate_file}"
 
 # Creating GTI
-if [ "$INST" == "PN" ]; then 
-  title "Creating GTI"
+title "Creating GTI"
+
+if [ "$INST" == "PN" ]; then
 
   evselect table=$org_file withrateset=Y rateset=$rate_file maketimecolumn=Y timebinsize=100 makeratecolumn=Y expression='#XMMEA_EP && (PI in [10000:12000]) && (PATTERN==0)' -V 0
+  RATE=0.5
 
-  if [[ $RATE != [0-9]* ]]; then
-    echo "Opening PN_rate.fits" 
-    fv $rate_file &
-    read -p "Choose the GTI cut rate : " RATE
-  fi
-  echo "Creating Good Time Intervals with threshold RATE=$RATE"
+elif [ "$INST" == "M1" ] || [ "$INST" == "M2" ]; then
 
-  tabgtigen table=$rate_file expression="RATE<=$RATE" gtiset=$gti_file -V 0
+  evselect table=$org_file withrateset=Y rateset=$rate_file maketimecolumn=Y timebinsize=100 makeratecolumn=Y expression='#XMMEA_EM && (PI>10000) && (PATTERN==0)' -V 0
+  RATE=0.4
+
 fi
 
-# Cleaning events file
-evselect table=$org_file withfilteredset=Y filteredset=$clean_file destruct=Y keepfilteroutput=T expression="#XMMEA_E$l && gti($gti_file,TIME) && (PATTERN<=4) && (PI in [500:12000])" -V 0
+if [[ $RATE != [0-9]* ]]; then
+    echo "Opening ${INST}_rate.fits" 
+    fv $rate_file &
+    read -p "Choose the GTI cut rate : " RATE
+fi
+echo "Creating Good Time Intervals with threshold RATE=$RATE"
 
-#ds9 $events_file -bin factor 64 -scale log -cmap bb -mode region &
+tabgtigen table=$rate_file expression="RATE<=$RATE" gtiset=$gti_file -V 0
+
+# Cleaning events file
+
+if [ "$INST" == "PN" ]; then
+
+  evselect table=$org_file withfilteredset=Y filteredset=$clean_file destruct=Y keepfilteroutput=T expression="#XMMEA_EP && gti($gti_file,TIME) && (PATTERN<=4) && (PI in [500:12000])" -V 0
+
+elif [ "$INST" == "M1" ] || [ "$INST" == "M2" ]; then
+
+  evselect table=$org_file withfilteredset=Y filteredset=$clean_file destruct=Y keepfilteroutput=T expression="#XMMEA_EM && gti($gti_file,TIME) && (PATTERN<=12) && (PI in [500:10000])" -V 0
+
+fi
 
 # Creating image file
+
 evselect table=$clean_file imagebinning=binSize imageset=$img_file withimageset=yes xcolumn=X ycolumn=Y ximagebinsize=80 yimagebinsize=80 -V 0
 
-echo > $path/PN_processing.log "Rate: $RATE"
+
+echo "Rate = $RATE" >> $path/${INST}_processing.log
+
 echo "The end" 
 date 

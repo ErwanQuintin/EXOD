@@ -3,11 +3,12 @@
 
 ########################################################################
 #                                                                      #
-# EXOD - Searching for fast transients into XMM-Newton data            #
+# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
 #                                                                      #
 # Generating lightcurve plots                                          #
 #                                                                      #
-# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com       #
+# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
+# Inés Pastor Marazuela (2019) - ines.pastor.marazuela@gmail.com      #
 #                                                                      #
 ########################################################################
 
@@ -37,11 +38,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-path", dest="path", help="Path to the observation files", nargs='?', type=str)
 parser.add_argument("-name", dest="name", help="Source name", nargs='?', type=str)
 parser.add_argument("-obs", help="Observation identifier", nargs='?', type=str, default="")
+parser.add_argument("-inst", help="Type of detector", nargs='?', type=str, default="PN")
 parser.add_argument("-src", help="Path to the source's lightcurve fits file", nargs='?', type=str, default=None)
 parser.add_argument("-bgd", help="Path to the background's lightcurve fits file", nargs='?', type=str, default=None)
 parser.add_argument("-gti", help="Path to the GTI of the observation", nargs='?', type=str, default=None)
 parser.add_argument("-tw", help="Time window", nargs='?', type=int, default=100)
-parser.add_argument("-n", help="Lightcurve number", nargs='?', type=str, default="")
+parser.add_argument("-ft", help="Frame time", nargs='?', type=float, default=None)
+parser.add_argument("-n", help="Lightcurve number", nargs='?', type=int, default=None)
 parser.add_argument("-pcs", dest="pcs", help="Chi-square probability of constancy", nargs='?', type=float, default=None)
 parser.add_argument("-pks", dest="pks", help="Kolmogorov-Smirnov probability of constancy", nargs='?', type=float, default=None)
 parser.add_argument("-mode", dest="mode", help="Plot style: monochrome / medium / color", nargs='?', type=str, default="medium")
@@ -57,30 +60,34 @@ if args.path[-1] == '/' :
 
 # Source and background files
 if args.src == None :
-    lccorr = '{0}/{1}/lcurve_{2}/{3}_lccorr_{2}.lc'.format(args.path, args.obs, args.tw, args.name)
+    lccorr = '{0}/{1}/lcurve_{2}_{4}_{5}/{3}_lccorr_{2}.lc'.format(args.path, args.obs, args.ft, args.name, args.inst,args.n)
     print(args.name)
     if path.exists(lccorr) :
         args.src = lccorr
     else : 
-        args.src = '{0}/{1}/lcurve_{2}/{3}_lc_{2}_src.lc'.format(args.path, args.obs, args.tw, args.name)
-        args.bgd = '{0}/{1}/lcurve_{2}/{3}_lc_{2}_bgd.lc'.format(args.path, args.obs, args.tw, args.src)
-        if not path.exists(args.name) :
+        args.src = '{0}/{1}/lcurve_{2}_{4}_{5}/{3}_lc_{2}_src.lc'.format(args.path, args.obs, args.tw, args.name, args.inst, args.n)
+        args.bgd = '{0}/{1}/lcurve_{2}_{4}_{5}/{3}_lc_{2}_bgd.lc'.format(args.path, args.obs, args.tw, args.name, args.inst, args.n)
+        if not path.exists(args.src) :
             print('ERROR: Source File {0} does not exist'.format(args.src))
             sys.exit()
-        if not path.exists(args.name) :
+        if not path.exists(args.bgd) :
             print('ERROR: Background File {0} does not exist'.format(args.bgd))
             sys.exit()
         
 # GTI file
 if args.gti == None :
-    args.gti = '{0}/{1}/PN_gti.fits'.format(args.path, args.obs)
+    args.gti = '{0}/{1}/{2}_gti.fits'.format(args.path, args.obs, args.inst)
     if not path.exists(args.gti) :
         print('ERROR: File {0} does not exist'.format(args.gti))
         sys.exit()
         
 # Output file
 src = (args.name).replace("_", "+")
-out='{0}/{1}/lcurve_{2}/{3}_lc_{2}.pdf'.format(args.path, args.obs, args.tw, args.name)
+#if args.n > 1000:
+#    out='{0}/{1}/lcurve_{2}_{4}_{5}/extracted_manual/{3}_lc_{2}.pdf'.format(args.path, args.obs, args.tw, args.name, args.inst,args.n)
+#else:
+out='{0}/{1}/lcurve_{2}_{4}_{5}/{3}_lc_{2}.pdf'.format(args.path, args.obs, args.tw, args.name, args.inst,args.n)
+    
 print(out)
 
 ###
@@ -174,7 +181,6 @@ xmax = time[-1]
 ymin = 0
 ymax = np.max(cts + std)
 
-med = np.median(cts)
 max = np.argmax(cts)    # Argument of the max
 min = np.argmin(cts)    # Argument of the min
 med = np.median(cts)
@@ -218,7 +224,7 @@ if "mono" in args.mode :
             ax.axvline(start_gti[i], color='w', lw=3, zorder=2)
             ax.axvline(stop_gti[i], color='w', lw=3, zorder=3)
             #ax.Axes_fill_betweenx([-1,100], start_gti[i], stop_gti[i], )
-if "med" in args.mode :
+elif "medium" in args.mode :
     # Data
     plt.plot(time, cts, "o-", linewidth=0.7, markersize=2, color='k', label="Source",zorder=2)
     plt.fill_between(time, cts - std, cts + std, alpha=0.3, color='c', zorder=2)
@@ -230,7 +236,7 @@ if "med" in args.mode :
         for i in range(len(data_gti)) :
             mpl.rcParams['hatch.linewidth'] = 0.1
             ax.axvspan(start_gti[i], stop_gti[i], facecolor= 'k', alpha=0.2, edgecolor='None', zorder=1)
-elif "colo" in args.mode :
+elif "color" in args.mode :
     # Data
     plt.plot(time, cts, 'o', markersize=2, color=color[0], zorder=6)
     plt.plot(time, cts, "o-", linewidth=0.7, markersize=2, color=color[0], label="Source",zorder=2)
@@ -246,13 +252,18 @@ elif "colo" in args.mode :
 #plt.legend(loc='upper right', fontsize=10)
 plt.xlabel("Time (s)", fontsize=16)
 plt.ylabel("counts s$^{-1}$", fontsize=16)
-# Text
-plt.text(0.03, 0.90, args.n, transform = ax.transAxes, fontsize=16)
-plt.text(0.1, 0.90, "OBS {0}".format(args.obs), transform = ax.transAxes, fontsize=16)
-plt.text(0.1, 0.80, src, transform = ax.transAxes, fontsize=16)
+
+# Title
+# Info
+plt.text(0.3, 1.16, "OBS : {0}".format(args.obs), transform = ax.transAxes, fontsize=16)
+
+plt.text(0.03, 1.1, "id : {0}".format(args.n), transform = ax.transAxes, fontsize=16)
+plt.text(0.2, 1.1, "inst : {0}".format(args.inst), transform = ax.transAxes, fontsize=16)
+plt.text(0.5, 1.1, "src : {0}".format(src), transform = ax.transAxes, fontsize=16)
 # Probabilities of constancy
-plt.text(0.95, 0.90, r"P($\chi^2$) = {0:.2e} ".format(args.pcs), horizontalalignment='right', transform = ax.transAxes, fontsize=16)
-plt.text(0.95, 0.80, r"P(KS) = {0:.2e} ".format(args.pks), horizontalalignment='right', transform = ax.transAxes, fontsize=16)
+plt.text(0.1, 1.03, r"P($\chi^2$) = {0:.2e} ".format(args.pcs), transform = ax.transAxes, fontsize=16)
+plt.text(0.52, 1.03, r"P(KS) = {0:.2e} ".format(args.pks), transform = ax.transAxes, fontsize=16)
+
 # Setup
 plt.xlim(xmin, xmax)
 plt.ylim(ymin, ymax)

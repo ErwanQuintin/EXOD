@@ -34,4 +34,5 @@ As the render_all.py output shows, one variable source has been detected with TW
 
 
 
-![variability](../master/example/variability_whole.png)
+![variability](../master/example/merged_sources.png)
+![variability](../master/example/merged_lc.png)

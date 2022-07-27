@@ -23,15 +23,14 @@ SCRIPTS=/path/EXOD/scripts
 FOLDER=/path/data
 ```
 
-One can use the `run_exodus.sh` script to download, filter and compute the variability for a list of observations. Let's try, for instance, with observation 0652250701, and (see the obs_ids.txt in the examples folder):
+One can use the `run_exodus.sh` script to download, filter and compute the variability for a list of observations. Let's try, for instance, with observation 0831790701, and (see the obs_ids.txt in the examples folder):
 
 ```
-bash run_exodus.sh -ob obs_ids.txt -lc false -it false
+bash run_exodus.sh -o obs_ids.txt -l true -i true
 ```
-The whole process should take a few minutes. An example of the output of these commands can be found in the folder `examples`.
+An example of the output of these commands can be found in the folder `examples`.
 
-As the render_all.py output shows, one variable source has been detected with TW=100 s, DL=8, bs=3.
-
+Belowe we see the results of run for OBSID 0831790701.
 
 
 ![variability](../master/example/merged_sources.png)

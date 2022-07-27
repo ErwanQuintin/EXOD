@@ -22,11 +22,11 @@ ITERATIVE_DET_LEVEL=false
 # Input variables
 while [[ $# -gt 0 ]]; do
 case "$1" in
-  -obs_id_file)          OBS_ID_FILE=${2}
+  --obs_id_file|-obs)          OBS_ID_FILE=${2}
   shift; shift ;;
-  -lc_enable)            LC_ENABLE=${2:-$LC_ENABLE}
+  --lc_enable|-lc)            LC_ENABLE=${2:-$LC_ENABLE}
   shift; shift ;;
-  -iterative_det_level)  ITERATIVE_DET_LEVEL=${2:-$ITERATIVE_DET_LEVEL}
+  --iterative_det_level|-it)  ITERATIVE_DET_LEVEL=${2:-$ITERATIVE_DET_LEVEL}
 esac
 done
 

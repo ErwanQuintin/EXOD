@@ -97,7 +97,7 @@ dic_classifier = {'': '',
 
                   }
 
-simbad_col_no=29
+simbad_col_no=32
 
 
 # Read in existing table and append additional column with this class

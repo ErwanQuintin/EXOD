@@ -32,19 +32,28 @@ import argparse
 #                                                                      #
 ########################################################################
 #
-parser = argparse.ArgumentParser()
+#####parser = argparse.ArgumentParser()
 #
-parser.add_argument("-path", help="Path to the folder containing the XMM catalog", type=str)
+#####parser.add_argument("-path", help="Path to the folder containing the XMM catalog", type=str)
 
-args = parser.parse_args()
+#####args = parser.parse_args()
 
-fits_image_filename = "4XMM_DR11cat_v1.0.fits"
-fits_image_filename= args.path + "/" + fits_image_filename
+#####fits_image_filename = "4XMM_DR11cat_v1.0.fits"
+#####fits_image_filename= args.path + "/" + fits_image_filename
+
+fits_image_filename = "../../4XMM_DR11cat_v1.0.fits/4XMM_DR11cat_v1.0.fits"
+
+
 hdul = fits.open(fits_image_filename)
 data = hdul[1].data
-obs_id = data.field('OBS_ID')
+table_obs_id = data.field('OBS_ID')
+table_src_id = data.field('SRCID')
 table_ra = data.field('SC_RA')
 table_dec = data.field('SC_DEC')
+table_flux = data.field('EP_8_FLUX')
+table_var_flag = data.field('VAR_FLAG')
+src_distance_cutoff = 30 # 30 arcsec
+
 
 #Coulmn numbers in the triple_match.csv file
 
@@ -81,6 +90,9 @@ with open('triple_match.csv','r') as csvinput:
         row.append('XMM_RA')
         row.append('XMM_DEC')
         row.append('EXOD_XMM_SEP')
+        row.append('XMM_SRCID')
+        row.append('XMM_EP8_FLUX')
+        row.append('XMM_PIPELINE_VARIABLE')
         all.append(row)
 
         for row in reader:
@@ -192,18 +204,61 @@ with open('triple_match.csv','r') as csvinput:
             row.append(center_pn_sep_med)
             row.append(center_m1_sep_med)
             row.append(center_m2_sep_med)
-            jj =0
-            for it in obs_id:
-                if(it == split_row[1]):
-                    row.append(table_ra[jj])
-                    row.append(table_dec[jj])
+            iterator =0
+            closest_sep=-1
+            closest_ra="NA"
+            closest_dec="NA"
+            closest_src_id ="NA"
+            closest_flux ="NA"
+            closest_var_flag ="No_match"
+            print("working on OBS ID", split_row[1])
+            for it in table_obs_id:
+                if (it != split_row[1]):
+                    iterator = iterator + 1
+                    continue
+                else:
                     c1 = SkyCoord(float(center_ra), float(center_dec), frame='fk5', unit='deg')
-                    c2 = SkyCoord(float(table_ra[jj]), float(table_dec[jj]), frame='fk5', unit='deg')
+                    c2 = SkyCoord(float(table_ra[iterator]), float(table_dec[iterator]), frame='fk5', unit='deg')
                     sep = c1.separation(c2)
-                    row.append( str(round(sep.arcsecond,2)))
-                    all.append(row)
-                    break
-                jj=jj+1
+                    if(sep.arcsecond <= src_distance_cutoff):
+                        if(closest_sep==-1):
+                            closest_sep=(round(sep.arcsecond,2))
+                            closest_ra=float(table_ra[iterator])
+                            closest_dec=float(table_dec[iterator])
+                            closest_src_id = table_src_id[iterator]
+                            closest_flux = table_flux[iterator]
+                            if(table_var_flag[iterator] == True): 
+                                closest_var_flag ="Yes_and_variable"
+                            else:
+                                closest_var_flag ="Yes_and_not_variable"
+                        else:
+                            if(closest_sep > sep.arcsecond):
+                                closest_sep=(round(sep.arcsecond,2))
+                                closest_ra=-float(table_ra[iterator])
+                                closest_dec=float(table_dec[iterator])
+                                closest_src_id = table_src_id[iterator]
+                                closest_flux = table_flux[iterator]
+                                if(table_var_flag[iterator] == True): 
+                                    closest_var_flag ="Yes_and_variable"
+                                else:
+                                    closest_var_flag ="Yes_and_not_variable"
+                    iterator = iterator + 1
+
+            if(closest_sep!=-1):
+                row.append(closest_ra)
+                row.append(closest_dec)
+                row.append(str(round(closest_sep,2)))
+                row.append(closest_src_id)
+                row.append(closest_flux)
+                row.append(closest_var_flag)
+            else:
+                row.append(closest_ra)
+                row.append(closest_dec)
+                row.append(str(round(closest_sep,2)))
+                row.append(closest_src_id)
+                row.append(closest_flux)
+                row.append(closest_var_flag)
+            all.append(row)
 
         writer.writerows(all)
 

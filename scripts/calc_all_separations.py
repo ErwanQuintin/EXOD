@@ -6,14 +6,14 @@
 #                                                                      #
 # EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
 #                                                                      #
-# Cross corelate variable sources                                      #
+# Cross correlate variable sources                                      #
 #                                                                      #
 # Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
 #                                                                      #
 ########################################################################
 """
-Cross corelate variable sources across the 3 EPIC cameras and 
-determine distancs between the sources and write results into
+Cross correlate variable sources across the 3 EPIC cameras and
+determine distances between the sources and write results into
 separation_file.csv which will be used by detect_final_corr.py
 
 """
@@ -35,7 +35,7 @@ seperation_cut_off = 600
 ########################################################################
 #                                                                      #
 # Determine the seperation between two sources and label them as       #
-# correlaated if separation is less than seperation_cut_off            #
+# correlated if separation is less than seperation_cut_off            #
 #                                                                      #
 ########################################################################
 

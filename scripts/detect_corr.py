@@ -6,15 +6,15 @@
 #                                                                      #
 # EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
 #                                                                      #
-#  Determine triple/double corelated sources                           #
+#  Determine triple/double correlated sources                           #
 #                                                                      #
 # Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
 #                                                                      #
 ########################################################################
 """
-Use the cross corelate variable sources across the 3 EPIC cameras
+Use the cross correlate variable sources across the 3 EPIC cameras
 from the previous step and organise the results into triple matches
-and double matches. Sources which are not cross corelated are
+and double matches. Sources which are not cross correlated are
 preseved and labled as singles.
 """
 import re

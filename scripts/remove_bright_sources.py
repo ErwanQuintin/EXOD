@@ -6,15 +6,15 @@
 #                                                                      #
 # EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
 #                                                                      #
-# Cross match sources with 4XMM_DR11cat_v1 catalog                     #
+# Eliminate any sources which lie within 1 arcmin of the bright source #
 #                                                                      #
 # Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
 #                                                                      #
 ########################################################################
 """
- Cross match sources with 4XMM_DR11cat_v1 catalog
- If it's a triple or double, the centroid is matched with the closest XMM source
- If it's a single source, it gets matched conventionally.
+Eliminate any sources which lie within 1 arcmin of the bright source.
+The list of bright sources from the XMM catalogue can be found in
+bright_sources.csv table.
 """
 from math import *
 import csv
@@ -38,13 +38,16 @@ parser.add_argument("-path", help="Path to the folder containing the XMM catalog
 
 args = parser.parse_args()
 
-fits_image_filename = "bright_sources.fits"
+fits_image_filename = "bright_sources.csv"
 fits_image_filename= args.path + "/" + fits_image_filename
-hdul = fits.open(fits_image_filename)
-data = hdul[1].data
-table_obs_id = data.field('OBS_ID')
-table_ra = data.field('SC_RA')
-table_dec = data.field('SC_DEC')
+
+
+table_obs_id_list = pd.read_csv(fits_image_filename, usecols = ['OBS_ID'])
+table_ra_list = pd.read_csv(fits_image_filename, usecols = ['SC_RA'])
+table_dec_list = pd.read_csv(fits_image_filename, usecols = ['SC_DEC'])
+table_obs_id = table_obs_id_list["OBS_ID"]
+table_ra = table_ra_list["SC_RA"]
+table_dec = table_dec_list["SC_DEC"]
 
 #Coulmn numbers in the triple_match.csv file
 
@@ -69,8 +72,7 @@ with open('triple_match_obs.csv','r') as csvinput:
         for row in reader:
             exod_ra= row[col_no_ra]
             exod_dec= row[col_no_dec]
-            split_row = re.split(' ', row[col_no_obs_id])
-            obs_id_ =  split_row[1]
+            obs_id_ =  row[col_no_obs_id]
 
             close_to_bright_src=0
             iterator=0

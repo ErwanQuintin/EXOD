@@ -31,6 +31,9 @@ import numpy as np
 #                                                                      #
 ########################################################################
 
+
+
+
 dic_classifier = {'': '',
 
                   'NA': 'NA',
@@ -46,14 +49,23 @@ dic_classifier = {'': '',
                   'Bubble': 'Unspecified', 'Cloud': 'Unspecified', 'SFregion': 'Unspecified', 'Galaxy_Candidate': 'Unspecified',
                   'Inexistent': 'Unspecified', 'gamma': 'Unspecified', 'GravLens': 'Unspecified',
                   'HVCld': 'Unspecified', 'Candidate_Lens': 'Unspecified', 'ISM': 'Unspecified', 'Void': 'Unspecified',
-                  'RfNeb': 'Unspecified', 'HIshell': 'Unspecified', 'Outflow': 'Unspecified', 'Region': 'Unspecified',   'cmRad': 'Unspecified',
-                  'Globule': 'Unspecified', 'outflow?': 'Unspecified', 'ComGlob': 'Unspecified', 'ULX_Candidate': 'Unspecified', 'PlanetaryNeb_Candidate': 'Unspecified', 'smmRad': 'Unspecified', 'radioBurst': 'Unspecified', 'DarkNeb' : 'Unspecified',  'Planet_Candidate' : 'Unspecified',  'MidIR' : 'Unspecified', 'mmRad' : 'Unspecified', 'Blend' : 'Unspecified', 'GravLens_Candidate' : 'Unspecified', 'HIIReg': 'Unspecified', 
+                   'HIshell': 'Unspecified', 'Outflow': 'Unspecified', 'Region': 'Unspecified',   'cmRad': 'Unspecified',
+                  'Globule': 'Unspecified', 'outflow?': 'Unspecified', 'ComGlob': 'Unspecified', 'ULX_Candidate': 'Unspecified',
+                  'PlanetaryNeb_Candidate': 'Unspecified', 'smmRad': 'Unspecified', 'radioBurst': 'Unspecified',
+                  'Planet_Candidate' : 'Unspecified',   'mmRad' : 'Unspecified', 'Blend': 'Unspecified',
+                  'GravLens_Candidate' : 'Unspecified', 'HIIReg': 'Unspecified',
+                  'HerbigHaroObj' : 'Unspecified','MidIR': 'Unspecified',
+ 
 
                   'GinCl': 'Galaxy', 'Galaxy': 'Galaxy', 'GiC': 'Galaxy', 'BClG': 'Galaxy', 'LSB_G': 'Galaxy',
                   'LensedG': 'Galaxy', 'GroupG': 'Galaxy', 'PartOfG': 'Galaxy', 'GinPair': 'Galaxy',
                   'Possible_ClG': 'Galaxy', 'Possible_G': 'Galaxy', 'Possible_GrG': 'Galaxy', 'GinGroup': 'Galaxy',
                   'HII_G': 'Galaxy', 'ClG': 'Galaxy', 'StarburstG': 'Galaxy', 'IG': 'Galaxy', 'SuperClG': 'Galaxy', 'GtowardsGroup' : 'Galaxy',
-                  'PartofG': 'Galaxy', 'Compact_Gr_G': 'Galaxy', 'PairG': 'Galaxy', 'BlueCompG': 'Galaxy', 'GtowardsCl' : 'Galaxy', 'BrightestCG' : 'Galaxy', 'Cluster*_Candidate': 'Galaxy', 'GlobCluster':'Galaxy',  'EmissionG': 'Galaxy', 'GlobCluster_Candidate' : 'Galaxy', 'BlueCompactG': 'Galaxy', 'LowSurfBrghtG': 'Galaxy', 'ClG_Candidate': 'Galaxy', 'HIIG' : 'Galaxy',
+                  'PartofG': 'Galaxy', 'Compact_Gr_G': 'Galaxy', 'PairG': 'Galaxy', 'BlueCompG': 'Galaxy', 'GtowardsCl' : 'Galaxy', 'BrightestCG' :
+                  'Galaxy', 'Cluster*_Candidate': 'Galaxy', 'GlobCluster':'Galaxy',  'EmissionG': 'Galaxy',
+                  'BlueCompactG': 'Galaxy', 'ClG_Candidate': 'Galaxy', 'HIIG' : 'Galaxy',  'GlCl': 'Galaxy', 'GlCl?': 'Galaxy',
+                  'LowSurfBrghtG': 'Galaxy',  'InteractingG': 'Galaxy',
+                  'GlobCluster_Candidate' : 'Galaxy', 'OpenCluster': 'Galaxy',
 
                   'AGN': 'AGN', 'Sy1': 'AGN','Seyfert1': 'AGN', 'Sy2': 'AGN', 'Seyfert2': 'AGN', 'AGN_Candidate': 'AGN', 'QSO': 'AGN', 'Seyfert_1': 'AGN',
                   'Seyfert_2': 'AGN', 'LINER': 'AGN', 'EmG': 'AGN', 'RadioG': 'AGN', 'LensedQ': 'AGN', 'BLLac': 'AGN',
@@ -79,8 +91,15 @@ dic_classifier = {'': '',
                   'Candidate_Hsd': 'Star', 'Candidate_Ae*': 'Star', 'Candidate_Cepheid': 'Star', 'post-AGB*': 'Star',
                   'Candidate_**': 'Star', 'Candidate_Symb*': 'Star', 'Candidate_S*': 'Star', 'Candidate_SG*': 'Star',
                   'Candidate_low-mass*': 'Star','HighPM*' : 'Star','WolfRayet*' : 'Star' ,'Cluster*' : 'Star' , 'Variable*' : 'Star' ,
-                  'GlCl': 'CompactObject', 'GlCl?': 'CompactObject', 'Pulsar': 'CompactObject', 'ULX': 'CompactObject', 'Low-Mass*' : 'Star' ,
-                  'TTauri*': 'star', 'AGB*_Candidate' : 'star', 'YSO_Candidate': 'star', 'Supernova':'star', 'BYDraV*':'star', 'RSCVnV*':'star', 'alf2CVnV*':'star', 'RCrBV*':'star', 'RGB*_Candidate':'star', 'RRLyrae_Candidate':'star', 'RedSG' :'star', 'HorBranch*':'star', 'IrregularV*':'star', 'LongPeriodV*':'star', 'LongPeriodV*_Candidate':'star',  'BrownD*_Candidate':'star', 'CataclyV*_Candidate':'star', 'ChemPec*':'star', 'delSctV*':'star', 'gammaDorV*':'star', 'SNRemnant':'star', 'Supernova_Candidate':'star', 'Be*_Candidate':'star',  'ClassicalCep':'star', 'EmLine*':'star',  'Mira_Candidate':'star',  'OH/IR*':'star','BlueSG' :'star','PlanetaryNeb':'star', 'RefNeb' :'star', 'Association' :'star',
+                  'Low-Mass*' : 'Star' , 'TTauri*': 'star', 'AGB*_Candidate' : 'star', 'YSO_Candidate': 'star', 'Supernova':'star', 'BYDraV*':'star',
+                  'RSCVnV*':'star', 'alf2CVnV*':'star',  'LongPeriodV*':'star', 'CataclyV*_Candidate':'star',
+                  'SNRemnant':'star', 'Be*_Candidate':'star', 'Mira_Candidate':'star',  'OH/IR*':'star',
+                  'RefNeb' :'star', 'Association' :'star', 'RCrBV*': 'star', 'RGB*_Candidate': 'star', 'RRLyrae': 'star',
+                  'RRLyrae_Candidate' : 'star','RedSG': 'star', 'BlueSG' : 'star','BrownD*': 'star', 'BrownD*_Candidate': 'star',
+                  'ChemPec*': 'star', 'RfNeb': 'star',  'delSctV*' : 'Star', 'LongPeriodV*_Candidate' : 'Star',
+                  'ClassicalCep': 'Star',  'EmLine*' : 'Star','gammaDorV*' : 'Star',  'Supernova_Candidate' : 'Star','PlanetaryNeb': 'Star',
+                  'HorBranch*' : 'Star','IrregularV*': 'Star', 'DarkNeb' : 'Star','Mira_Candidate' 'Association': 'Star',
+                  
                   
                   
                   
@@ -91,13 +110,17 @@ dic_classifier = {'': '',
                   'Candidate_WD*': 'CompactObject', 'WD*': 'CompactObject', 'SN': 'CompactObject',
                   'gammaBurst': 'CompactObject', 'Candidate_XB*': 'CompactObject', 'Candidate_BH': 'CompactObject',
                   'NS': 'CompactObject', 'Candidate_NS': 'CompactObject', 'Neutron*': 'CompactObject',
-                  'Candidate_CV*': 'CompactObject', 'Candidate_Nova': 'CompactObject', 'WhiteDwarf': 'CompactObject', 'WhiteDwarf_Candidate': 'CompactObject', 'XrayBin':'CompactObject', 'HighMassXBin':'CompactObject', 'LowMassXBin':'CompactObject', 'LowMassXBin_Candidate':'CompactObject', 'Neutron*_Candidate':'CompactObject','EclBin':'CompactObject', 'EclBin_Candidate':'CompactObject', 'blue':'CompactObject',
+                  'Candidate_CV*': 'CompactObject', 'Candidate_Nova': 'CompactObject', 'WhiteDwarf': 'CompactObject',
+                  'WhiteDwarf_Candidate': 'CompactObject', 'XrayBin':'CompactObject', 'HighMassXBin':'CompactObject',
+                  'LowMassXBin':'CompactObject', 'LowMassXBin_Candidate':'CompactObject',
+                  'EclBin':'CompactObject', 'EclBin_Candidate':'CompactObject', 'blue':'CompactObject', 'Pulsar': 'CompactObject',
+                  'ULX': 'CompactObject', 'Neutron*_Candidate': 'CompactObject',
 
                    'X': 'X_ray_source',
 
                   }
 
-simbad_col_no=24
+simbad_col_no=19
 
 
 # Read in existing table and append additional column with this class

@@ -26,6 +26,7 @@ from os.path import sys
 from astropy.io import fits
 from astropy import wcs
 from astropy.table import Table
+import numpy as np
 
 
 ########################################################################
@@ -46,23 +47,15 @@ def extraction_photons(events_file):
 
     events = hdulist[1].data
     header = hdulist[1].header
-    inst = header['INSTRUME']
-    if inst == 'EPN' :
-        ccdnb = 12
-    elif inst == 'EMOS1' or 'EMOS2' :
-        ccdnb = 7
-    
-    events_filtered = []
-    for i in range(ccdnb) :
-        events_filtered.append([])
 
-    for evt in events :
-        events_filtered[int(evt['CCDNR'])-1].append(evt)
+    #We will make use of the fact that the events file is already sorted by CCDs
+    #First we split the events file by CCDs by retrieving the indices where the CCD# changes
+    indices_ccd_change = np.where(np.diff(events["CCDNR"]))[0]
+    events_filtered = np.split(np.array(events), indices_ccd_change)
+    events_filtered = [np.array(ccd_events) for ccd_events in events_filtered]
 
-    hdulist.close()
-    events_filtered_sorted = []
-    for i in range(ccdnb) :
-        events_filtered_sorted.append(sorted(events_filtered[i], key=lambda k: int(k['TIME'])))
+    #Then we sort the events of each CCDs in chronological order
+    events_filtered_sorted = [ccd_events[np.argsort(ccd_events['TIME'])] for ccd_events in events_filtered]
 
     return events_filtered_sorted, header
 

@@ -29,7 +29,8 @@ import os
 from matplotlib.ticker import NullFormatter
 from itertools import combinations
 from scipy.stats import linregress
-
+from scipy.ndimage import convolve
+from scipy.sparse import csr_matrix
 
 # Internal imports
 from file_utils import *
@@ -41,7 +42,7 @@ from exodus_utils import check_multiple_sources
 #                                                                      #
 ########################################################################
 
-def variability_computation(gti, time_interval, acceptable_ratio, start_time, end_time, inst, data) :
+def variability_computation(gti, time_interval, acceptable_ratio, start_time, end_time, inst, box_size, data) :
 	"""
 	Function implementing the variability calculation using average technique.
 	@param  gti:     G round, the list of TW cut-off the observation
@@ -67,75 +68,60 @@ def variability_computation(gti, time_interval, acceptable_ratio, start_time, en
 		n_bins = n_bins - 1
 		stop_time = start_time + n_bins * time_interval
 
-	V_mat = np.ones([xMax,yMax])
-	counted_events = np.zeros([xMax,yMax,n_bins])
 	time_windows = np.arange(start_time, stop_time, time_interval)
-	projection_ratio = np.ones(n_bins)
 
-	# GTI
-	cdt_start = []
-	cdt_stop  = []
-	for l in range(len(gti['START'])):
-		start = np.where((time_windows[:] < gti[l]['START']) & (time_windows[:] + time_interval > gti[l]['START']))[0]
-		if len(start) != 0 :
-			cdt_start.append(start[0])
-		stop  = np.where((gti[l]['STOP'] > time_windows[:]) & (gti[l]['STOP'] < time_windows[:] + time_interval))[0]
-		if len(stop) != 0 :
-			cdt_stop.append(stop[0])
+	#We treat the GTIs, depending on whether we accept partial time bins or not
+	if acceptable_ratio < 1:
+		##If we accept partial time bins, the effective fraction of GTI in a time bin is computed by oversampling in each
+		##time bin, and getting the fraction of these subsamples that are in GTIs
+		oversampling = 1000
+		oversampled_timewindows = np.arange(start_time, stop_time, time_interval / oversampling)
+
+		indices_oversampledtimebins_gtistart = np.searchsorted(gti['START'], oversampled_timewindows[:-1])
+		indices_oversampledtimebins_gtistop = np.searchsorted(gti['STOP'], oversampled_timewindows[1:])
+
+		indices_fully_inGTI = np.where(indices_oversampledtimebins_gtistart - indices_oversampledtimebins_gtistop == 1,
+									   1, 0)
+		splitted_oversample = [indices_fully_inGTI[i:i + oversampling] for i in
+							   range(0, len(indices_fully_inGTI), oversampling)]
+		projection_ratio = np.array([np.sum(elt) / len(elt) for elt in splitted_oversample])
+	else:
+		##If we only accept full GTI time bins, we check if the beginning and end of each time bin are in the same GTI,
+		##by looking at the difference of insertion index. If it is 1, then the GTI is the same
+		indices_timebins_gtistart = np.searchsorted(gti['START'], time_windows[:-1])
+		indices_timebins_gtistop = np.searchsorted(gti['STOP'], time_windows[1:])
+		projection_ratio = np.where(indices_timebins_gtistart - indices_timebins_gtistop == 1, 1, np.nan)
 
 	# Counting events
-	i = 0			# Data counts
-	n_last = None	# Last time window with a stop on it
-	for n in range(n_bins) :
-		# Good time
-		t0 = 0
-		tf = 0
-		if n in cdt_start :
-			t0 = gti[cdt_start.index(n)]['START']
-			n_last = None
-		else :
-			t0 = time_windows[n]
-		if n in cdt_stop :
-			tf = gti[cdt_stop.index(n)]['STOP']
-			n_last = n
-		else :
-			tf = time_windows[n] + time_interval
-		if n_last == None :
-			good_time = tf - t0
-			projection_ratio[n] = good_time / time_interval
-		else :
-			projection_ratio[n] = 0
-		
-		# Counting events
-		while i < len(data) and data[i]['TIME'] <= time_windows[n] + time_interval :
-			j = int(data[i]['RAWX'])-1
-			k = int(data[i]['RAWY'])-1
-			for x in range(j-1,j+2) :
-				for y in range(k-1,k+2) :
-					if 0<=x<xMax and 0<=y<yMax :
-						counted_events[x][y][n] += 1
-			i += 1
-		i += 1
-		
-	# Correcting with projection ratio
+	## Group by pixel and time, first on X then on Y and t, selecting boxes at the same time
+	nbr_events = len(data)
+	box_halfwidth = (box_size-1)//2 #Only works well for odd box size. If even, box_size-1 is used
+	grouped_events = [data[np.where(np.abs(data['RAWX']-x)<=box_halfwidth)] for x in range(xMax)]
+	grouped_events = [[dataX[np.where(np.abs(dataX['RAWY']-y)<=box_halfwidth)] for y in range(yMax)] for dataX in grouped_events]
+	grouped_events = [[[evt['TIME'] for evt in grouped_events[x][y]] for y in range(yMax)] for x in
+		 range(xMax)]
+
+	## If the matrix is sparse (i.e. less than half dense) we use sparse matrices, otherwise remain arrays
 	cdt = np.where(projection_ratio >= acceptable_ratio)[0]
-	counted_events = counted_events[:,:,cdt] / projection_ratio[cdt]
-	time_windows   = time_windows[cdt]
+	if nbr_events<0.5*(xMax*yMax*len(time_windows)):
+		##This creates a 2D matrix of 1D sparse (time) vectors, built by np.histogram on the photon times
+		counted_events=np.array([[csr_matrix(np.histogram(grouped_events[x][y],time_windows)[0][cdt]/projection_ratio[cdt])
+											 for y in range(yMax)] for x in range(xMax)])
+		image_max = np.array([[pixelligthcurve.max() for pixelligthcurve in column] for column in counted_events])
+		image_min = np.array([[pixelligthcurve.min() for pixelligthcurve in column] for column in counted_events])
+		image_median = np.array([[pixelligthcurve.mean() for pixelligthcurve in column] for column in counted_events])
+	else:
+		##If the matrix is not sparse, we create this 3D (XxYxTime) array
+		counted_events = np.array(
+			[[np.histogram(grouped_events[x][y], time_windows)[0][cdt]/projection_ratio[cdt] for y in range(yMax)]
+			 for x in range(xMax)], dtype=int)
+		image_max = np.max(counted_events, axis=2)
+		image_min = np.min(counted_events, axis=2)
+		image_median = np.median(counted_events, axis=2)
 
 	# Computing variability
-	if len(counted_events[0][0]) > 1 :
-		for i in range(len(counted_events)) :
-			for j in range(len(counted_events[i])) :
-				max = np.amax(counted_events[i][j])
-				min = np.amin(counted_events[i][j])
-				med = np.median(counted_events[i][j])
-				if med != 0 :
-					V_mat[i][j] = np.amax([(max - med),np.absolute(min - med)])/med
-				else :
-					V_mat[i][j] = max
-
-	elif len(counted_events[0][0]) == 1 :
-		print("No data within the GTI")
+	V_mat = np.where(image_median > 0, np.max((image_max - image_median, image_median - image_min)) / image_median,
+					 image_max)
 
 	return V_mat
 

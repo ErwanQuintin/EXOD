@@ -194,7 +194,7 @@ def main_fct() :
         # Computing v_matrix
         v_matrix = []
 
-        var_calc_partial = partial(variability_computation, gti_list, args.tw, args.gtr, t0_observation, tf_observation, args.inst)
+        var_calc_partial = partial(variability_computation, gti_list, args.tw, args.gtr, t0_observation, tf_observation, args.bs, args.inst)
 
         with Pool(args.mta) as p:
             v_matrix = p.map(var_calc_partial, data)

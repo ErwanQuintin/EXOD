@@ -30,38 +30,12 @@ from astropy.coordinates import SkyCoord
 from astropy.table import Table
 import argparse
 
+from detect_corr import check_correlation
+
 
 seperation_cut_off = 25
 include_doubles=True
 include_singles=True
-########################################################################
-#                                                                      #
-# Determine the seperation between two sources and label them as       #
-# correlaated if separation is less than seperation_cut_off            #
-#                                                                      #
-########################################################################
-
-def check_correlation(src_1, src_2, corr_tab):
-    """
-	Function checking the correlation sources between two source lists
-
-	@param  src_1:      The source list of first detector
-	@param  src_2:      The source list of second detector
-	@param  corr_table: The correlation table
-
-	@return: The correlation table appended
-	"""
-
-    for i in range(len(src_1)):
-        for j in range(len(src_2)):
-            c1 = SkyCoord(src_1['RA'][i], src_1['DEC'][i], frame='fk5', unit='deg')
-            c2 = SkyCoord(src_2['RA'][j], src_2['DEC'][j], frame='fk5', unit='deg')
-            sep = c1.separation(c2)
-            if sep.arcsecond < seperation_cut_off:
-                corr_tab.add_row([src_1['ID'][i], src_1['INST'][i], src_1['RA'][i], src_1['DEC'][i], src_2['ID'][j], src_2['INST'][j], src_2['RA'][j], src_2['DEC'][j], round(sep.arcsecond,2)])
-
-    return corr_tab
-
 
 ########################################################################
 #                                                                      #

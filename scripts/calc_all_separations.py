@@ -1,64 +1,23 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Cross correlate variable sources                                      #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Cross correlate variable sources
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
 Cross correlate variable sources across the 3 EPIC cameras and
 determine distances between the sources and write results into
 separation_file.csv which will be used by detect_final_corr.py
-
 """
-
 import re
-import sys
 import os
 import numpy as np
 from astropy.table import Table
-import astropy.coordinates as coord
-import astropy.units as u
-from astropy.io import ascii
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 import argparse
 
+from exodus_utils import check_correlation
 
-seperation_cut_off = 600
-########################################################################
-#                                                                      #
-# Determine the seperation between two sources and label them as       #
-# correlated if separation is less than seperation_cut_off            #
-#                                                                      #
-########################################################################
 
-def check_correlation(src_1, src_2, corr_tab):
-    """
-	Function checking the correlation sources between two source lists
-
-	@param  src_1:      The source list of first detector
-	@param  src_2:      The source list of second detector
-	@param  corr_table: The correlation table
-
-	@return: The correlation table appended
-	"""
-
-    for i in range(len(src_1)):
-        for j in range(len(src_2)):
-            c1 = SkyCoord(src_1['RA'][i], src_1['DEC'][i], frame='fk5', unit='deg')
-            c2 = SkyCoord(src_2['RA'][j], src_2['DEC'][j], frame='fk5', unit='deg')
-            sep = c1.separation(c2)
-            if sep.arcsecond < seperation_cut_off:
-                corr_tab.add_row([src_1['ID'][i], src_1['INST'][i], src_1['RA'][i], src_1['DEC'][i], src_2['ID'][j], src_2['INST'][j], src_2['RA'][j], src_2['DEC'][j], round(sep.arcsecond,2)])
-
-    return corr_tab
 
 
 ########################################################################
@@ -144,9 +103,10 @@ print("M2 detections = ",m2_matches)
 
 
 # Checking correlation for the 3 EPIC
-corr_table = check_correlation(src_PN, src_M1, corr_table)
-corr_table = check_correlation(src_M1, src_M2, corr_table)
-corr_table = check_correlation(src_PN, src_M2, corr_table)
+seperation_cut_off = 600
+corr_table = check_correlation(src_PN, src_M1, corr_table, sep_cutoff=seperation_cut_off)
+corr_table = check_correlation(src_M1, src_M2, corr_table, sep_cutoff=seperation_cut_off)
+corr_table = check_correlation(src_PN, src_M2, corr_table, sep_cutoff=seperation_cut_off)
 
 # Sorting the table
 corr_PN_M1 = corr_table[np.where((corr_table['INST_1'] == 'PN') & (corr_table['INST_2'] == 'M1'))]

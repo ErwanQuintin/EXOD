@@ -17,30 +17,6 @@ from astropy.table import Table
 
 from exodus_utils import check_correlation
 
-def check_correlation(src_1, src_2, corr_tab):
-    """
-	Function checking the correlation sources between two source lists
-
-	@param  src_1:      The source list of first detector
-	@param  src_2:      The source list of second detector
-	@param  corr_table: The correlation table
-
-	@return: The correlation table appended
-	"""
-    seperation_cut_off = 14
-
-    for i in range(len(src_1)):
-        for j in range(len(src_2)):
-            c1 = SkyCoord(src_1['RA'][i], src_1['DEC'][i], frame='fk5', unit='deg')
-            c2 = SkyCoord(src_2['RA'][j], src_2['DEC'][j], frame='fk5', unit='deg')
-            sep = c1.separation(c2)
-            print (sep.arcsecond)
-            if sep.arcsecond < seperation_cut_off:
-                corr_tab.add_row([src_1['ID'][i], src_1['INST'][i], src_1['RA'][i], src_1['DEC'][i], src_2['ID'][j], src_2['INST'][j], src_2['RA'][j], src_2['DEC'][j], round(sep.arcsecond,2)])
-
-    return corr_tab
-
-
 
 ###
 # Parsing arguments
@@ -93,8 +69,10 @@ with open(m_path, 'r') as file:
 
 
 print("M detections = ",m_matches)
+
 # Checking correlation for the 3 EPIC
-corr_table = check_correlation(src_PN, src_M, corr_table)
+seperation_cut_off = 14
+corr_table = check_correlation(src_PN, src_M, corr_table, sep_cutoff=seperation_cut_off)
 
 # Sorting the table
 corr_PN_M1 = corr_table[np.where((corr_table['INST_1'] == 'PN') & (corr_table['INST_2'] == args.inst))]

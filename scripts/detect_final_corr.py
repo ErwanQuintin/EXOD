@@ -33,7 +33,6 @@ import argparse
 from detect_corr import check_correlation
 
 
-seperation_cut_off = 25
 include_doubles=True
 include_singles=True
 
@@ -155,9 +154,10 @@ print("M2 detections = ",m2_matches)
 
 
 # Checking correlation for the 3 EPIC
-corr_table = check_correlation(src_PN, src_M1, corr_table)
-corr_table = check_correlation(src_M1, src_M2, corr_table)
-corr_table = check_correlation(src_PN, src_M2, corr_table)
+seperation_cut_off = 25
+corr_table = check_correlation(src_PN, src_M1, corr_table, sep_cutoff=seperation_cut_off)
+corr_table = check_correlation(src_M1, src_M2, corr_table, sep_cutoff=seperation_cut_off)
+corr_table = check_correlation(src_PN, src_M2, corr_table, sep_cutoff=seperation_cut_off)
 
 # Sorting the table
 corr_PN_M1 = corr_table[np.where((corr_table['INST_1'] == 'PN') & (corr_table['INST_2'] == 'M1'))]

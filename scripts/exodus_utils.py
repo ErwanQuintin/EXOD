@@ -1,36 +1,38 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Rendering for exodus program                                         #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
-"""
-Various functions for EXODUS program
-"""
-
-# Third-party imports
-
 import numpy as np
 from astropy.table import Table, Column
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
-# Internal imports
+def check_correlation(src_1, src_2, corr_tab, sep_cutoff):
+    """
+    Check for correlations between sources in two source lists.
+
+    Parameters:
+    - src_1 (Table): The source list of the first detector.
+    - src_2 (Table): The source list of the second detector.
+    - corr_tab (Table): The correlation table.
+
+    Returns:
+    Table: The correlation table appended.
+    """
+    for source_1 in src_1:
+        for source_2 in src_2:
+            coord_1 = SkyCoord(source_1['RA'], source_1['DEC'], frame='fk5', unit='deg')
+            coord_2 = SkyCoord(source_2['RA'], source_2['DEC'], frame='fk5', unit='deg')
+            radius_sum = source_1['R'] + source_2['R']
+            sep = coord_1.separation(coord_2)
+
+            if sep.arcsecond < sep_cutoff:
+                corr_tab.add_row([
+                    source_1['ID'], source_1['INST'], source_1['RA'], source_1['DEC'], source_1['R'],
+                    source_2['ID'], source_2['INST'], source_2['RA'], source_2['DEC'], source_2['R']
+                ])
+
+    return corr_tab
 
 
-########################################################################
-#                                                                      #
-# Check if the radoius of one source overlaps with the othe            #
-#                                                                      #
-########################################################################
 
-def check_correlation(src_1, src_2, corr_tab) :
+def check_overlapping_sources(src_1, src_2, corr_tab) :
     """
 	Function checking the correlation sources between two source lists
     
@@ -46,6 +48,7 @@ def check_correlation(src_1, src_2, corr_tab) :
             c1 = SkyCoord(src_1['RA'][i], src_1['DEC'][i], frame='fk5', unit='deg')
             c2 = SkyCoord(src_2['RA'][j], src_2['DEC'][j], frame='fk5', unit='deg')
             sep = c1.separation(c2)
+
             if sep.arcsecond < (src_1['R'][i]+src_2['R'][j]):
                 corr_tab.add_row([src_1['ID'][i], src_1['INST'][i], src_1['RA'][i], src_1['DEC'][i], src_1['R'][i],\
                                 src_2['ID'][j], src_2['INST'][j], src_2['RA'][j], src_2['DEC'][j], src_2['R'][j]])

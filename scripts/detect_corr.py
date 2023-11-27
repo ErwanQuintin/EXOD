@@ -1,43 +1,21 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-#  Determine triple/double correlated sources                           #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+Determine triple/double correlated sources               
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu      
+
 Use the cross correlate variable sources across the 3 EPIC cameras
 from the previous step and organise the results into triple matches
 and double matches. Sources which are not cross correlated are
 preseved and labled as singles.
 """
+import argparse
 import re
-import sys
-import os
+
 import numpy as np
 from astropy.table import Table
-import astropy.coordinates as coord
-import astropy.units as u
-from astropy.io import ascii
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
-# Third-party imports
-import argparse
 
-
-seperation_cut_off = 14
-########################################################################
-#                                                                      #
-# Determine the seperation between two sources and label them as       #
-# correlaated if separation is less than seperation_cut_off            #
-#                                                                      #
-########################################################################
+from exodus_utils import check_correlation
 
 def check_correlation(src_1, src_2, corr_tab):
     """
@@ -49,13 +27,14 @@ def check_correlation(src_1, src_2, corr_tab):
 
 	@return: The correlation table appended
 	"""
+    seperation_cut_off = 14
 
     for i in range(len(src_1)):
         for j in range(len(src_2)):
             c1 = SkyCoord(src_1['RA'][i], src_1['DEC'][i], frame='fk5', unit='deg')
             c2 = SkyCoord(src_2['RA'][j], src_2['DEC'][j], frame='fk5', unit='deg')
             sep = c1.separation(c2)
-            print ( sep.arcsecond)
+            print (sep.arcsecond)
             if sep.arcsecond < seperation_cut_off:
                 corr_tab.add_row([src_1['ID'][i], src_1['INST'][i], src_1['RA'][i], src_1['DEC'][i], src_2['ID'][j], src_2['INST'][j], src_2['RA'][j], src_2['DEC'][j], round(sep.arcsecond,2)])
 
@@ -114,7 +93,6 @@ with open(m_path, 'r') as file:
 
 
 print("M detections = ",m_matches)
-
 # Checking correlation for the 3 EPIC
 corr_table = check_correlation(src_PN, src_M, corr_table)
 

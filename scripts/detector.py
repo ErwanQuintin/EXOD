@@ -14,6 +14,7 @@ import argparse
 
 import numpy as np
 
+from logger import logger
 from fits_extractor import *
 from variability_utils import *
 import file_names as FileNames

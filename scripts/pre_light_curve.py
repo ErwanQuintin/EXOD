@@ -23,6 +23,9 @@ import os
 import numpy as np
 import argparse
 
+from logger import logger
+
+
 
 ########################################################################
 #                                                                      #

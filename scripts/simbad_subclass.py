@@ -1,17 +1,9 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-#  Classify the SIMBAD matches into one of 5 classes                   #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
+Classify the SIMBAD matches into one of 5 classes
+
 Given the SIMBAD object type, define a dictionary and classify 
 the objects into one of the following:
 NA, Unspecified, Galaxy, AGN, Star, CompactObject or X-Ray source

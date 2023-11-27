@@ -1,26 +1,14 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# RENDERER functions to be used with the DETECTOR                      #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
-Renderer's main programme
-"""
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 
-# Built-in imports
+RENDERER functions to be used with the DETECTOR
+"""
 
 from os.path import sys
 import os
 import shutil
 
-# Third-party imports
 
 from math import *
 import numpy as np
@@ -37,9 +25,7 @@ from astropy.io import fits
 from astropy.table import Table, Column
 from astropy.coordinates import SkyCoord
 
-
-# Internal imports
-
+from logger import logger
 import file_names as FileNames
 from exodus_utils import correl_flag
 from file_utils import *

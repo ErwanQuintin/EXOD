@@ -1,26 +1,8 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Generating lightcurve plots                                          #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
-
-
-# Built-in imports
-
+import argparse
 from math import *
 from os import path
 from os.path import sys
 
-# Third-party imports
-
-import argparse
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -29,9 +11,7 @@ from matplotlib.ticker import FormatStrFormatter
 from scipy.stats import binned_statistic
 from astropy.io import fits
 
-###
-# Parsing arguments
-###
+from logger import logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument(

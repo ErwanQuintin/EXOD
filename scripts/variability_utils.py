@@ -1,38 +1,22 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# DETECTOR utilities                                                   #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System 
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu       
+DETECTOR utilities                                         
 Implementation of variability-related procedures specified into the documentation
 """
-
+import os
+from itertools import combinations
 from math import *
-
-# Third-party imports
 
 import numpy as np
 from astropy.table import Table
 from astroquery.simbad import Simbad
 import astropy.coordinates as coord
 import astropy.units as u
-from astropy.io import ascii
 from astropy.coordinates import SkyCoord
-import os
-from matplotlib.ticker import NullFormatter
-from itertools import combinations
 from scipy.stats import linregress
-from scipy.ndimage import convolve
 from scipy.sparse import csr_matrix
 
-# Internal imports
 from file_utils import *
 from exodus_utils import check_multiple_sources
 

@@ -1,20 +1,12 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Declaration of file names                                            #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           
+Declaration of file names                                            
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 
 Declaration of the file names handled both by the detector and the renderer
 """
 import os
+from logger import logger
+
 
 # Created files
 LOG = "log.txt"

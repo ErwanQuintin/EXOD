@@ -16,6 +16,8 @@ from astropy.table import Table
 import argparse
 
 from exodus_utils import check_correlation
+from logger import logger
+
 
 
 ########################################################################

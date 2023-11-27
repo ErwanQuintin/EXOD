@@ -20,16 +20,19 @@ Independetly detect the number of PN matches from a given past EXOD run
 import re
 import sys
 import os
+import argparse
+
 import numpy as np
-from astropy.table import Table
 import astropy.coordinates as coord
 import astropy.units as u
+from astropy.table import Table
 from astropy.io import ascii
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
-# Third-party imports
-import argparse
+from logger import logger
+
+
 
 
 ########################################################################

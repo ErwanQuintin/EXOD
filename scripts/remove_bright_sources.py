@@ -1,30 +1,21 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Eliminate any sources which lie within 1 arcmin of the bright source #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
 Eliminate any sources which lie within 1 arcmin of the bright source.
 The list of bright sources from the XMM catalogue can be found in
 bright_sources.csv table.
 """
+
 from math import *
-import csv
-import pandas as pd
-import math
-import numpy as np
-from astropy.io import fits
-import re
-from astropy.coordinates import SkyCoord
 import argparse
+import csv
+import re
+
+import numpy as np
+import pandas as pd
+from astropy.io import fits
+from astropy.coordinates import SkyCoord
+
+from logger import logger
+
 
 ########################################################################
 #                                                                      #

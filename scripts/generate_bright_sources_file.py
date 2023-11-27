@@ -17,14 +17,18 @@ XMM catalogue. The generated bright_sources.csv table
 is used by remove_bright_sources.py. 
 """
 from math import *
-import csv
-import pandas as pd
-import math
-import numpy as np
-from astropy.io import fits
 import re
-from astropy.coordinates import SkyCoord
 import argparse
+import csv
+
+import pandas as pd
+import numpy as np
+
+from astropy.io import fits
+from astropy.coordinates import SkyCoord
+from logger import logger
+
+
 
 ########################################################################
 #                                                                      #

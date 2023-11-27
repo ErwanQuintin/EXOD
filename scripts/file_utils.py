@@ -13,7 +13,9 @@ import numpy as np
 import scipy.ndimage as nd
 import skimage.transform
 
+from logger import logger
 import file_names as FileNames
+
 
 
 ########################################################################

@@ -16,6 +16,7 @@ from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 from exodus_utils import check_correlation
+from logger import logger
 
 
 ###

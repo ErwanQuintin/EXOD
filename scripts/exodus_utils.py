@@ -2,6 +2,7 @@ import numpy as np
 from astropy.table import Table, Column
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+from astropy.table import Table
 
 
 def check_correlation(src_1, src_2, corr_tab, sep_cutoff):
@@ -236,6 +237,3 @@ def correl_flag(src, corr_table, triple_l):
                     s["correl"] = "Triple"
 
     return src1
-
-
-########################################################################

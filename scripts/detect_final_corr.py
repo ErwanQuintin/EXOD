@@ -31,6 +31,7 @@ from astropy.table import Table
 import argparse
 
 from detect_corr import check_correlation
+from logger import logger
 
 
 include_doubles = True

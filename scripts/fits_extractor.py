@@ -1,32 +1,22 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
+"""
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
 #                                                                      #
 # DETECTOR utilities                                                   #
 #                                                                      #
 # Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
-"""
+
 Variability-related procedures specified into the documentation
 """
-
+from os.path import sys
 import time
 
-# Built-in imports
-
-from os.path import sys
-
-# Third-party imports
-
+import numpy as np
 from astropy.io import fits
 from astropy import wcs
 from astropy.table import Table
-import numpy as np
+
+from logger import logger
+
 
 
 ########################################################################

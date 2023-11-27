@@ -1,28 +1,22 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Query SIMBAD and find the closest 5 matches                          #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+Query SIMBAD and find the closest 5 matches 
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+
 Given a RA, DEC query SIMBAD and find the closest 5 matches that fall
 within 30 arcsec of the detection and collate the results into a table.
 """
-
-from astroquery.simbad import Simbad
-import astropy.coordinates as coord
-import astropy.units as u
-from astropy.io import ascii
-from astropy.coordinates import SkyCoord
 import os
 import csv
+
+import astropy.coordinates as coord
+import astropy.units as u
+from astroquery.simbad import Simbad
+from astropy.io import ascii
+from astropy.coordinates import SkyCoord
+
+from logger import logger
+
 
 ########################################################################
 #                                                                      #

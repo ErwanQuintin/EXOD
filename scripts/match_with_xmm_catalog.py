@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Cross match sources with 4XMM_DR11cat_v1 catalog                     #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
  Cross match sources with 4XMM_DR11cat_v1 catalog
  If it's a triple or double, the centroid is matched with the closest XMM source
@@ -19,12 +6,14 @@
 from math import *
 import csv
 import pandas as pd
-import math
 import numpy as np
 from astropy.io import fits
 import re
 from astropy.coordinates import SkyCoord
 import argparse
+
+from logger import logger
+
 
 ########################################################################
 #                                                                      #

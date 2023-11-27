@@ -9,11 +9,12 @@ the objects into one of the following:
 NA, Unspecified, Galaxy, AGN, Star, CompactObject or X-Ray source
 """
 
-from math import *
 import csv
-import pandas as pd
 import math
+from math import *
+
 import numpy as np
+import pandas as pd
 
 ########################################################################
 #                                                                      #

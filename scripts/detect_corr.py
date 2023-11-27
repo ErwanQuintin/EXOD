@@ -13,13 +13,11 @@ import argparse
 import re
 
 import numpy as np
-from astropy.table import Table
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 from exodus_utils import check_correlation
 from logger import logger
-
 
 ###
 # Parsing arguments

@@ -7,18 +7,17 @@ The list of bright sources from the XMM catalogue can be found in
 bright_sources.csv table.
 """
 
-from math import *
 import argparse
 import csv
 import re
+from math import *
 
 import numpy as np
 import pandas as pd
-from astropy.io import fits
 from astropy.coordinates import SkyCoord
+from astropy.io import fits
 
 from logger import logger
-
 
 ########################################################################
 #                                                                      #

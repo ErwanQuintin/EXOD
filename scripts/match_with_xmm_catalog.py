@@ -3,17 +3,17 @@
  If it's a triple or double, the centroid is matched with the closest XMM source
  If it's a single source, it gets matched conventionally.
 """
-from math import *
-import csv
-import pandas as pd
-import numpy as np
-from astropy.io import fits
-import re
-from astropy.coordinates import SkyCoord
 import argparse
+import csv
+import re
+from math import *
+
+import numpy as np
+import pandas as pd
+from astropy.coordinates import SkyCoord
+from astropy.io import fits
 
 from logger import logger
-
 
 ########################################################################
 #                                                                      #

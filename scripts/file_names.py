@@ -5,8 +5,8 @@ Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 Declaration of the file names handled both by the detector and the renderer.
 """
 import os
-from logger import logger
 
+from logger import logger
 
 # Created files
 LOG = "log.txt"

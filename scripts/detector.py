@@ -4,22 +4,22 @@ Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 
 DETECTOR main programme.
 """
-import sys
-import os
-import time
-from math import *
-from functools import partial
-from multiprocessing import Pool
 import argparse
+import os
+import sys
+import time
+from functools import partial
+from math import *
+from multiprocessing import Pool
 
 import numpy as np
 
-from logger import logger
-from fits_extractor import *
-from variability_utils import *
 import file_names as FileNames
 from file_utils import *
+from fits_extractor import *
+from logger import logger
 from renderer import *
+from variability_utils import *
 
 parser = argparse.ArgumentParser()
 

@@ -6,18 +6,16 @@ Cross correlate variable sources across the 3 EPIC cameras and
 determine distances between the sources and write results into
 separation_file.csv which will be used by detect_final_corr.py
 """
-import re
+import argparse
 import os
+import re
+
 import numpy as np
-from astropy.table import Table
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
-import argparse
 
 from exodus_utils import check_correlation
 from logger import logger
-
-
 
 ########################################################################
 #                                                                      #

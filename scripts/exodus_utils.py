@@ -7,10 +7,9 @@ Utility Functions for EXOD.
 """
 
 import numpy as np
-from astropy.table import Table, Column
-from astropy.coordinates import SkyCoord
 from astropy import units as u
-from astropy.table import Table
+from astropy.coordinates import SkyCoord
+from astropy.table import Column, Table
 
 
 def check_correlation(src_1, src_2, corr_tab, sep_cutoff):

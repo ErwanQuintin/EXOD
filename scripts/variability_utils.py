@@ -10,17 +10,17 @@ import os
 from itertools import combinations
 from math import *
 
-import numpy as np
-from astropy.table import Table
-from astroquery.simbad import Simbad
 import astropy.coordinates as coord
 import astropy.units as u
+import numpy as np
 from astropy.coordinates import SkyCoord
-from scipy.stats import linregress
+from astropy.table import Table
+from astroquery.simbad import Simbad
 from scipy.sparse import csr_matrix
+from scipy.stats import linregress
 
-from file_utils import *
 from exodus_utils import check_multiple_sources
+from file_utils import *
 
 ########################################################################
 #                                                                      #

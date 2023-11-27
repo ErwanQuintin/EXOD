@@ -8,19 +8,17 @@ The following code generates a list of bright sources from the
 XMM catalogue. The generated bright_sources.csv table
 is used by remove_bright_sources.py. 
 """
-from math import *
-import re
 import argparse
 import csv
+import re
+from math import *
 
-import pandas as pd
 import numpy as np
-
-from astropy.io import fits
+import pandas as pd
 from astropy.coordinates import SkyCoord
+from astropy.io import fits
+
 from logger import logger
-
-
 
 ########################################################################
 #                                                                      #

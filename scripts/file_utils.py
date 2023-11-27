@@ -4,19 +4,17 @@ Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 
 Various resources for both detector and renderer.
 """
-import sys
 import os
-from math import *
 import subprocess
+import sys
+from math import *
 
 import numpy as np
 import scipy.ndimage as nd
 import skimage.transform
 
-from logger import logger
 import file_names as FileNames
-
-
+from logger import logger
 
 ########################################################################
 #                                                                      #

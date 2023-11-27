@@ -7,11 +7,12 @@ This allows us to decouple the light curve generation
 from the variable source dection.
 """
 
+import argparse
+import os
 import re
 import sys
-import os
+
 import numpy as np
-import argparse
 
 from logger import logger
 

@@ -10,13 +10,13 @@ from math import *
 from os import path
 from os.path import sys
 
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
+from astropy.io import fits
 from matplotlib import rcParams
 from matplotlib.ticker import FormatStrFormatter
 from scipy.stats import binned_statistic
-from astropy.io import fits
 
 from logger import logger
 

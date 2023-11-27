@@ -10,17 +10,16 @@ and double matches. Sources which are not cross correlated are
 preseved and labled as singles.
 """
 
-import re
+import argparse
 import os
+import re
+
 import numpy as np
-from astropy.table import Table
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
-import argparse
 
 from detect_corr import check_correlation
 from logger import logger
-
 
 include_doubles = True
 include_singles = True

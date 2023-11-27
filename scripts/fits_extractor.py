@@ -4,17 +4,15 @@ Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 
 Variability-related procedures specified into the documentation
 """
-from os.path import sys
 import time
+from os.path import sys
 
 import numpy as np
-from astropy.io import fits
 from astropy import wcs
+from astropy.io import fits
 from astropy.table import Table
 
 from logger import logger
-
-
 
 ########################################################################
 

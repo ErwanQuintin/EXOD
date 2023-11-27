@@ -7,17 +7,16 @@ Query SIMBAD and find the closest 5 matches
 Given a RA, DEC query SIMBAD and find the closest 5 matches that fall
 within 30 arcsec of the detection and collate the results into a table.
 """
-import os
 import csv
+import os
 
 import astropy.coordinates as coord
 import astropy.units as u
-from astroquery.simbad import Simbad
-from astropy.io import ascii
 from astropy.coordinates import SkyCoord
+from astropy.io import ascii
+from astroquery.simbad import Simbad
 
 from logger import logger
-
 
 ########################################################################
 #                                                                      #

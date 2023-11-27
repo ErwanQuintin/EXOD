@@ -5,30 +5,29 @@ Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 RENDERER functions to be used with the DETECTOR
 """
 
-from os.path import sys
 import os
 import shutil
-
-
 from math import *
-import numpy as np
+from os.path import sys
+
 import matplotlib
+import numpy as np
 
 matplotlib.use("Pdf")
-from matplotlib import colors, image, transforms, gridspec
-from matplotlib.patches import Circle
 import matplotlib.pyplot as plt
-from pylab import figure, cm
-from astropy import wcs
 from astropy import units as u
-from astropy.io import fits
-from astropy.table import Table, Column
+from astropy import wcs
 from astropy.coordinates import SkyCoord
+from astropy.io import fits
+from astropy.table import Column, Table
+from matplotlib import colors, gridspec, image, transforms
+from matplotlib.patches import Circle
+from pylab import cm, figure
 
-from logger import logger
 import file_names as FileNames
 from exodus_utils import correl_flag
 from file_utils import *
+from logger import logger
 
 
 def render_variability(

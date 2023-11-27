@@ -1,7 +1,8 @@
 """
-Query SIMBAD and find the closest 5 matches 
 Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+
+Query SIMBAD and find the closest 5 matches 
 
 Given a RA, DEC query SIMBAD and find the closest 5 matches that fall
 within 30 arcsec of the detection and collate the results into a table.

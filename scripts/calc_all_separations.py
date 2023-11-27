@@ -1,6 +1,5 @@
 """
 EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
-Cross correlate variable sources
 Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 
 Cross correlate variable sources across the 3 EPIC cameras and

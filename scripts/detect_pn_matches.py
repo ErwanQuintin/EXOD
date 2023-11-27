@@ -1,22 +1,10 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Independetly detect the number of PN matches                         #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
 Independetly detect the number of PN matches from a given past EXOD run
 
 """
-
-
 import re
 import sys
 import os
@@ -31,9 +19,6 @@ from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 from logger import logger
-
-
-
 
 ########################################################################
 #                                                                      #

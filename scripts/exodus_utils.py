@@ -1,3 +1,11 @@
+"""
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
+Utility Functions for EXOD.
+
+"""
+
 import numpy as np
 from astropy.table import Table, Column
 from astropy.coordinates import SkyCoord

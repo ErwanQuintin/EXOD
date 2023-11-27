@@ -2,7 +2,7 @@
 EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
 Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu      
 
-Various resources for both detector and renderer
+Various resources for both detector and renderer.
 """
 import sys
 import os

@@ -1,3 +1,10 @@
+"""
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
+
+"""
+
 import argparse
 from math import *
 from os import path

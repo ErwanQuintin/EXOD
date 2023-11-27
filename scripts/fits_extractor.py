@@ -1,9 +1,6 @@
 """
-EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# DETECTOR utilities                                                   #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 
 Variability-related procedures specified into the documentation
 """

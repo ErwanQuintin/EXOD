@@ -1,17 +1,9 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-#  Determine triple/double correlated sources                           #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
+Determine triple/double correlated sources
+
 Use the cross correlate variable sources across the 3 EPIC cameras
 from the previous step and organise the results into triple matches
 and double matches. Sources which are not cross correlated are
@@ -19,13 +11,9 @@ preseved and labled as singles.
 """
 
 import re
-import sys
 import os
 import numpy as np
 from astropy.table import Table
-import astropy.coordinates as coord
-import astropy.units as u
-from astropy.io import ascii
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 import argparse

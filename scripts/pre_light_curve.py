@@ -1,17 +1,7 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Collect data for independent light curve generation                  #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
 Collect data for independent light curve generation. 
 This allows us to decouple the light curve generation 
 from the variable source dection.
@@ -24,8 +14,6 @@ import numpy as np
 import argparse
 
 from logger import logger
-
-
 
 ########################################################################
 #                                                                      #

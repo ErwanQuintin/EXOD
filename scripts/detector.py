@@ -1,8 +1,8 @@
 """
 EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
-DETECTOR main programme
 Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
-Detector's main programme
+
+DETECTOR main programme.
 """
 import sys
 import os

@@ -1,4 +1,7 @@
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
 Eliminate any sources which lie within 1 arcmin of the bright source.
 The list of bright sources from the XMM catalogue can be found in
 bright_sources.csv table.

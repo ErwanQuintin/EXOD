@@ -1,17 +1,9 @@
-#!/usr/bin/env python3
-# coding=utf-8
-
-
-########################################################################
-#                                                                      #
-# EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System           #
-#                                                                      #
-# Generate bright_sources.csv table                                    #
-#                                                                      #
-# Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu                 #
-#                                                                      #
-########################################################################
 """
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
+Generate bright_sources.csv table
+
 The following code generates a list of bright sources from the
 XMM catalogue. The generated bright_sources.csv table
 is used by remove_bright_sources.py. 

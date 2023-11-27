@@ -1,6 +1,8 @@
 """
-Determine triple/double correlated sources               
-Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu      
+EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System
+Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
+
+Determine triple/double correlated sources
 
 Use the cross correlate variable sources across the 3 EPIC cameras
 from the previous step and organise the results into triple matches

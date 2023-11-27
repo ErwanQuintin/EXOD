@@ -1,8 +1,10 @@
 """
 EXODUS - EPIC XMM-Newton Outburst Detector Ultimate System 
 Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu       
-DETECTOR utilities                                         
-Implementation of variability-related procedures specified into the documentation
+
+DETECTOR utilities.
+
+Implementation of variability-related procedures specified into the documentation.
 """
 import os
 from itertools import combinations

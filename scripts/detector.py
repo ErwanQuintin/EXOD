@@ -24,14 +24,8 @@ from functools import partial
 
 from math import *
 from multiprocessing import Pool
-from astropy.io import fits
-from astropy.table import Table
-from astropy import wcs
-from astropy.coordinates import SkyCoord
-from astropy import units as u
 import numpy as np
 import argparse
-import matplotlib.pyplot as plt
 
 # Internal imports
 

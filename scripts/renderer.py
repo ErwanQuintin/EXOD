@@ -5,10 +5,7 @@ Maitrayee Gupta (2022) - maitrayee.gupta@irap.omp.eu
 RENDERER functions to be used with the DETECTOR
 """
 
-import os
-import shutil
 from math import *
-from os.path import sys
 
 import matplotlib
 import numpy as np
@@ -19,12 +16,8 @@ from astropy import units as u
 from astropy import wcs
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
-from astropy.table import Column, Table
-from matplotlib import colors, gridspec, image, transforms
 from matplotlib.patches import Circle
-from pylab import cm, figure
 
-import file_names as FileNames
 from exodus_utils import correl_flag
 from file_utils import *
 from logger import logger

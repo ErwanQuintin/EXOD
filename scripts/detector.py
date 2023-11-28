@@ -248,9 +248,9 @@ def main_fct():
             log_f,
             args.img,
             best_match_f,
-            args.bs,
-            args.dl,
             args.tw,
+            args.dl,
+            args.bs,
             args.gtr,
         )
 

@@ -27,7 +27,7 @@ def open_files(folder_name):
     """
     Function opening files and writing their legend.
     @param  folder_name:  The directory to create the files.
-    @return: log_file, info_file, variability_file, counter_per_tw,
+    @return: info_file, variability_file, counter_per_tw,
     detected_variable_areas_file, time_windows_file
     """
 
@@ -43,22 +43,9 @@ def open_files(folder_name):
             print("Error in creating output directory.\nABORTING", file=sys.stderr)
             exit(-1)
 
-    # Declaring the files
-    log_file = None
     var_file = None
     reg_file = None
     best_match_file = None
-
-    # Creating the log file
-    try:
-        log_file = open(folder_name + FileNames.LOG, "w+")
-
-    except IOError as e:
-        print("Error in creating log.txt.\nABORTING", file=sys.stderr)
-        print(e, file=sys.stderr)
-        close_files(log_file, var_file, reg_file, best_match_file)
-        print_help()
-        exit(-1)
 
     # Creating the file to store variability per pixel
     try:
@@ -70,7 +57,6 @@ def open_files(folder_name):
             file=sys.stderr,
         )
         print(e, file=sys.stderr)
-        close_files(log_file, var_file, reg_file, best_match_file)
         print_help()
         exit(-1)
 
@@ -83,7 +69,6 @@ def open_files(folder_name):
             "Error in creating {0}.\nABORTING".format(FileNames.REGION), file=sys.stderr
         )
         print(e, file=sys.stderr)
-        close_files(log_file, var_file, reg_file, best_match_file)
         print_help()
         exit(-1)
 
@@ -97,53 +82,13 @@ def open_files(folder_name):
             file=sys.stderr,
         )
         print(e, file=sys.stderr)
-        close_files(log_file, var_file, reg_file, best_match_file)
         print_help()
         exit(-1)
 
-    return log_file, var_file, reg_file, best_match_file
+    return var_file, reg_file, best_match_file
 
 
-########################################################################
 
-
-def close_files(log_f, var_f, reg_f, bes_match_f):
-    """
-    Function closing all files.
-    """
-
-    if log_f:
-        log_f.close()
-
-    # if var_f :
-    #    var_f.close()
-
-    # if reg_f :
-    #    reg_f.close()
-
-
-########################################################################
-
-
-class Tee(object):
-    """
-    Class object that will print the output to the log_f file
-    and to terminal
-    """
-
-    def __init__(self, *files):
-        self.files = files
-
-    def write(self, obj):
-        for f in self.files:
-            f.write(obj)
-            f.flush()  # If you want the output to be visible immediately
-
-    def flush(self):
-        pass
-
-
-########################################################################
 
 
 def read_from_file(file_path, counter=False, comment_token="#", separator=";"):
@@ -247,7 +192,7 @@ class Source(object):
         self.var_dec = None
         self.var_r = self.skyr * 0.05  # arcseconds
 
-    def sky_coord(self, path, img, log_f):
+    def sky_coord(self, path, img):
         """
         Calculate sky coordinates with the sas task edet2sky.
         Return x, y, ra, dec
@@ -292,9 +237,6 @@ class Source(object):
             )[0][0]
             + 2
         )
-        # Writing in log file
-        for line in txt[deb:]:
-            log_f.write(line + "\n")
 
         # Equatorial coordinates
         self.ra, self.dec = det2sky[

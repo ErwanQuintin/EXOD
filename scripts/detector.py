@@ -15,11 +15,11 @@ from multiprocessing import Pool
 import numpy as np
 
 import file_names as FileNames
-from file_utils import *
+from file_utils import open_files 
 from fits_extractor import *
 from logger import logger
 from renderer import *
-from variability_utils import *
+from variability_utils import variability_computation
 
 parser = argparse.ArgumentParser()
 # Path to files
@@ -76,36 +76,17 @@ def main_fct():
     """
     Main function of the detector
     """
-    ###
-    # Preliminaries
-    ###
-    print(vars(args))
+    logger.info(f'Running detector.py...')
+    logger.info('Parsed Arguments:') 
+    for k, v in vars(args).items():
+        logger.info(f'{k:<10} : {v}')
 
-    print(
-        """
-        INSTRUMENT      = {0}
-        DETECTION LEVEL = {1}
-        TIME WINDOW     = {2}
-        BOX SIZE        = {3}
-        GOOD TIME RATIO = {4}
-        """.format(
-            args.inst, args.dl, args.tw, args.bs, args.gtr
-        )
-    )
+    
+    logger.info('Calling open_files...')
+    var_f, reg_f, best_match_f = open_files(args.out)
+    logger.info(f'var_f={var_f} reg_f={reg_f}')
 
-    print(" Writing output to folder '{0}'".format(args.out))
 
-    # Counter for the overall execution time
-    original_time = time.time()
-
-    # Opening the output files
-    log_f, var_f, reg_f, best_match_f = open_files(args.out)
-    original = sys.stdout
-    sys.stdout = Tee(sys.stdout, log_f)
-
-    ###
-    # Skipping variability computation if already done
-    ###
     vf = False
     if args.novar:
         print(" Checking if variability has been computed.")
@@ -121,20 +102,15 @@ def main_fct():
 
     if not args.novar and not vf:
         # Recovering the EVENTS list
-        print(
-            " Recovering the events list\t {:7.2f} s".format(
-                time.time() - original_time
-            )
-        )
+        logger.info('Recovering Events list')
         try:
             data, header = extraction_photons(args.evts)
-
+            logger.info(f'len(data)={len(data)}')
             if args.obs == None:
                 args.obs = header["OBS_ID"]
 
         except Exception as e:
             print(" !!!!\nImpossible to extract photons. ABORTING.")
-            close_files(log_f, var_f, reg_f, best_match_f)
             exit(-2)
 
         # Parameters ready
@@ -149,38 +125,32 @@ def main_fct():
             "BS": args.bs,
         }
 
-        # Recovering GTI list
-        try:
-            print(" Extracting data\t\t {:7.2f} s".format(time.time() - original_time))
-            gti_list = extraction_deleted_periods(args.gti)
+        logger.info('Extracting GTI list...')
+        gti_list = extraction_deleted_periods(args.gti)
+        logger.info(f'gti_list={gti_list}')
 
-        except Exception as e:
-            print(" !!!!\nImpossible to extract gti. ABORTING.")
-            close_files(log_f, var_f, reg_f, best_match_f)
-            exit(-2)
 
         # Computation of initial and final time
+        logger.info('Getting observation initial and final times...')
         t0_observation = min([evt["TIME"] for ccd in data for evt in ccd])
         tf_observation = max([evt["TIME"] for ccd in data for evt in ccd])
+        logger.info(f't0_observation={t0_observation} tf_observation={tf_observation}')
 
-        print(
-            " Computing variability\t\t {:7.2f} s".format(time.time() - original_time)
-        )
+        logger.info('Computing Variability')
+
         v_matrix = []
 
-        var_calc_partial = partial(
-            variability_computation,
-            gti_list,
-            args.tw,
-            args.gtr,
-            t0_observation,
-            tf_observation,
-            args.bs,
-            args.inst,
-        )
-
-        with Pool(args.mta) as p:
-            v_matrix = p.map(var_calc_partial, data)
+        for d in data: 
+            v = variability_computation(gti=gti_list,
+                                    time_interval=args.tw,
+                                    acceptable_ratio=args.gtr,
+                                    start_time=t0_observation,
+                                    end_time=tf_observation,
+                                    inst=args.inst,
+                                    box_size=args.bs,
+                                    data=d)
+            v_matrix.append(v)
+ 
 
         # Checking data mode acquisition
         submode = header["SUBMODE"]
@@ -211,15 +181,7 @@ def main_fct():
             img_v = data_transformation_MOS(data_vm, header)
             # print ("m1 here 2")
 
-        ###
-        # Detecting variable areas and sources
-        ###
-
-        print(
-            " Detecting variable sources\t {:7.2f} s".format(
-                time.time() - original_time
-            )
-        )
+        logger.info('Detecting Variable Source')
         v_matrix = np.array(v_matrix)
         median = np.median(v_matrix)
 
@@ -262,12 +224,7 @@ def main_fct():
     # Plotting variability
     # Renderer
     if args.render:
-        print(
-            " Rendering variability image\t {:7.2f} s".format(
-                time.time() - original_time
-            )
-        )
-
+        logger.info('Rendering variability image')
         render_variability(
             var_f, args.out + FileNames.OUTPUT_IMAGE, sources=False, maximum_value=None
         )
@@ -282,17 +239,11 @@ def main_fct():
     if args.ds9:
         ds9_renderer(var_f, reg_f)
 
-    print(
-        " # Total execution time OBS {0} : {1:.2f} s\n".format(
-            args.obs, (time.time() - original_time)
-        )
-    )
+
+    logger.info('Finished Execution')
     log_f.close()
 
 
 if __name__ == "__main__":
-    original_time = time.time()
-    original_date = time.strftime("%d/%m/%Y %H:%M:%S", time.gmtime())
-
     main_fct()
 

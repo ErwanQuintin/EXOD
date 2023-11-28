@@ -6,9 +6,11 @@ DETECTOR utilities.
 
 Implementation of variability-related procedures specified into the documentation.
 """
+import logging
 import os
 from itertools import combinations
 from math import *
+from re import I
 
 import astropy.coordinates as coord
 import astropy.units as u
@@ -29,20 +31,47 @@ from file_utils import *
 ########################################################################
 
 
-def variability_computation(
-    gti, time_interval, acceptable_ratio, start_time, end_time, inst, box_size, data
-):
+def variability_computation(gti, time_interval, acceptable_ratio, start_time, end_time, inst, box_size, data):
     """
-    Function implementing the variability calculation using average technique.
-    @param  gti:     G round, the list of TW cut-off the observation
-    @param  time_interval:   The duration of a time window
-    @param  acceptable_ratio:  The acceptability ratio for a TW - good time ratio
-    @param  start_time:  The t0 instant of the observation
-    @param  end_time: The tf instant of the observation
-    @param  inst:    Type of detector
-    @param  data:    E round, the list of events sorted by their TIME attribute
-    @return: The matrix V_round
+    Calculate variability using the average technique.
+
+    Parameters:
+        gti (list): The list of time windows cut-off for the observation.
+        time_interval (float): The duration of a time window.
+        acceptable_ratio (float): The acceptability ratio for a time window - good time ratio.
+        start_time (float): The starting instant of the observation.
+        end_time (float): The ending instant of the observation.
+        inst (str): Type of detector.
+        box_size (float): Box size for the calculation.
+        data (list): Events sorted by their TIME attribute.
+
+    Returns:
+        list: The matrix V_round.
     """
+    logging.debug('Calling variability_computation()...')
+    logging.debug('gti:')
+    logging.debug(gti)
+
+    logging.debug('time_interval:')
+    logging.debug(time_interval)
+
+    logging.debug('acceptable_ratio:')
+    logging.debug(acceptable_ratio)
+
+    logging.debug('start_time:')
+    logging.debug(start_time)
+
+    logging.debug('end_time:')
+    logging.debug(end_time)
+
+    logging.debug('inst:')
+    logging.debug(inst)
+
+    logging.debug('box_size:')
+    logging.debug(box_size)
+
+    logging.debug('data:')
+    logging.debug(data)
 
     # Defining the variables and matrices
     if inst == "PN":
@@ -51,107 +80,87 @@ def variability_computation(
     elif inst == "M1" or "M2":
         xMax = 600
         yMax = 600
+    
     n_bins = int(np.ceil((end_time - start_time) / time_interval))
     stop_time = start_time + n_bins * time_interval
-    if (stop_time - end_time) / time_interval > acceptable_ratio:
+    time_ratio = (stop_time - end_time) / time_interval 
+
+    logging.debug(f'n_bins={n_bins} stop_time={stop_time} time_ratio={time_ratio:.2f}')
+    if time_ratio > acceptable_ratio:
+        logging.debug(f'time ratio ({time_ratio:.2f} > acceptable_ratio {acceptable_ratio:.2f}')
         n_bins = n_bins - 1
         stop_time = start_time + n_bins * time_interval
+        logging.debug('Reducing nbins by 1. new stop_time={stop_time}')
 
     time_windows = np.arange(start_time, stop_time, time_interval)
+    logging.debug(f'number of time_windows={len(time_windows)}')
 
     # We treat the GTIs, depending on whether we accept partial time bins or not
     if acceptable_ratio < 1:
+        logging.debug('acceptable_ratio<1, only accepting partial time bins')
         ##If we accept partial time bins, the effective fraction of GTI in a time bin is computed by oversampling in each
         ##time bin, and getting the fraction of these subsamples that are in GTIs
         oversampling = 1000
-        oversampled_timewindows = np.arange(
-            start_time, stop_time, time_interval / oversampling
-        )
+        oversampled_timewindows = np.arange(start_time, stop_time, time_interval / oversampling)
 
-        indices_oversampledtimebins_gtistart = np.searchsorted(
-            gti["START"], oversampled_timewindows[:-1]
-        )
-        indices_oversampledtimebins_gtistop = np.searchsorted(
-            gti["STOP"], oversampled_timewindows[1:]
-        )
+        indices_oversampledtimebins_gtistart = np.searchsorted(gti["START"], oversampled_timewindows[:-1])
+        indices_oversampledtimebins_gtistop  = np.searchsorted(gti["STOP"], oversampled_timewindows[1:])
 
-        indices_fully_inGTI = np.where(
-            indices_oversampledtimebins_gtistart - indices_oversampledtimebins_gtistop
-            == 1,
-            1,
-            0,
-        )
-        splitted_oversample = [
-            indices_fully_inGTI[i : i + oversampling]
-            for i in range(0, len(indices_fully_inGTI), oversampling)
-        ]
-        projection_ratio = np.array(
-            [np.sum(elt) / len(elt) for elt in splitted_oversample]
-        )
+        indices_fully_inGTI = np.where(indices_oversampledtimebins_gtistart - indices_oversampledtimebins_gtistop==1,1,0)
+        splitted_oversample = [indices_fully_inGTI[i : i + oversampling] for i in range(0, len(indices_fully_inGTI), oversampling)]
+        projection_ratio    = np.array([np.sum(elt) / len(elt) for elt in splitted_oversample])
+
     else:
+        logging.debug('acceptable_ratio=1, only allowing full time bins')
         ##If we only accept full GTI time bins, we check if the beginning and end of each time bin are in the same GTI,
         ##by looking at the difference of insertion index. If it is 1, then the GTI is the same
+
         indices_timebins_gtistart = np.searchsorted(gti["START"], time_windows[:-1])
         indices_timebins_gtistop = np.searchsorted(gti["STOP"], time_windows[1:])
-        projection_ratio = np.where(
-            indices_timebins_gtistart - indices_timebins_gtistop == 1, 1, np.nan
-        )
+        projection_ratio = np.where(indices_timebins_gtistart - indices_timebins_gtistop == 1, 1, np.nan)
+
+        logging.debug('indices_timebins_gtistart:')
+        logging.debug(indices_timebins_gtistart)
+        logging.debug('indices_timebins_gtistop:')
+        logging.debug(indices_timebins_gtistop)
+        logging.debug('projection_ratio:')
+        logging.debug(projection_ratio)
 
     # Counting events
     ## Group by pixel and time, first on X then on Y and t, selecting boxes at the same time
     nbr_events = len(data)
-    box_halfwidth = (
-        box_size - 1
-    ) // 2  # Only works well for odd box size. If even, box_size-1 is used
-    grouped_events = [
-        data[np.where(np.abs(data["RAWX"] - x) <= box_halfwidth)] for x in range(xMax)
-    ]
-    grouped_events = [
-        [
-            dataX[np.where(np.abs(dataX["RAWY"] - y) <= box_halfwidth)]
-            for y in range(yMax)
-        ]
-        for dataX in grouped_events
-    ]
-    grouped_events = [
-        [[evt["TIME"] for evt in grouped_events[x][y]] for y in range(yMax)]
-        for x in range(xMax)
-    ]
+    box_halfwidth = (box_size - 1) // 2  # Only works well for odd box size. If even, box_size-1 is used
+    grouped_events = [data[np.where(np.abs(data["RAWX"] - x) <= box_halfwidth)] for x in range(xMax)]
+    grouped_events = [[dataX[np.where(np.abs(dataX["RAWY"] - y) <= box_halfwidth)] for y in range(yMax)] for dataX in grouped_events]
+    grouped_events = [[[evt["TIME"] for evt in grouped_events[x][y]] for y in range(yMax)] for x in range(xMax)]
+
+    logging.debug(f'nbr_events: {nbr_events} box_halfwidth={box_halfwidth} len(grouped_events)={len(grouped_events)}')
 
     ## If the matrix is sparse (i.e. less than half dense) we use sparse matrices, otherwise remain arrays
     cdt = np.where(projection_ratio >= acceptable_ratio)[0]
+    logging.debug('cdt:')
+    logging.debug(cdt)
+
     if nbr_events < 0.5 * (xMax * yMax * len(time_windows)):
-        ##This creates a 2D matrix of 1D sparse (time) vectors, built by np.histogram on the photon times
-        counted_events = np.array(
-            [
-                [
-                    csr_matrix(
-                        np.histogram(grouped_events[x][y], time_windows)[0][cdt]
-                        / projection_ratio[cdt]
-                    )
-                    for y in range(yMax)
-                ]
-                for x in range(xMax)
-            ]
-        )
-        image_max = np.array(
-            [
-                [pixelligthcurve.max() for pixelligthcurve in column]
-                for column in counted_events
-            ]
-        )
-        image_min = np.array(
-            [
-                [pixelligthcurve.min() for pixelligthcurve in column]
-                for column in counted_events
-            ]
-        )
-        image_median = np.array(
-            [
-                [pixelligthcurve.mean() for pixelligthcurve in column]
-                for column in counted_events
-            ]
-        )
+        # This creates a 2D matix of 1D sparse (time) vectors, built by np.histogram on the photon times
+        # This takes a long time
+        counted_events = np.array([[csr_matrix(np.histogram(grouped_events[x][y], time_windows)[0][cdt] / projection_ratio[cdt]) for y in range(yMax)] for x in range(xMax)])
+        image_max    = np.array([[c.max() for c in column] for column in counted_events])
+        image_min    = np.array([[c.min() for c in column] for column in counted_events])
+        image_median = np.array([[c.mean() for c in column] for column in counted_events])
+
+        logging.debug('counted_events:')
+        logging.debug(counted_events)
+
+        logging.debug('image_max:')
+        logging.debug(image_max)
+
+        logging.debug('image_min:')
+        logging.debug(image_min)
+
+        logging.debug('image_median:')
+        logging.debug(image_median)
+
     else:
         ##If the matrix is not sparse, we create this 3D (XxYxTime) array
         counted_events = np.array(
@@ -550,7 +559,7 @@ def variable_sources_position(
     for i in range(len(sources)):
         # Getting Source class
         src = Source(sources[i])
-        src.sky_coord(path_out, img_file, log_file)
+        src.sky_coord(path_out, img_file)
         src.r = round(src.r, 3)
         # Adding source to table
         source_table.add_row(

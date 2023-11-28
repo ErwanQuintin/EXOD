@@ -27,9 +27,10 @@ def extraction_photons(events_file):
     @return maximum, minimum
     @raise Exception: An exception from astropy if something went wrong
     """
+    logger.debug('calling extraction_photons()')
+    logger.debug(f'events_file={events_file}')
 
     hdulist = fits.open(events_file)
-
     events = hdulist[1].data
     header = hdulist[1].header
 
@@ -43,7 +44,6 @@ def extraction_photons(events_file):
     events_filtered_sorted = [
         ccd_events[np.argsort(ccd_events["TIME"])] for ccd_events in events_filtered
     ]
-
     return events_filtered_sorted, header
 
 

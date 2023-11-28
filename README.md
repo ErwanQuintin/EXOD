@@ -38,3 +38,48 @@ Belowe we see the results of run for OBSID 0831790701.
 
 ![variability](../master/example/merged_sources.png)
 ![variability](../master/example/merged_lc.png)
+
+## File explainations (in /Scripts/:
+```
+Generic:
+--------
+parallel.sh   : script to run jobs in parallel                                      
+logger.py     : Logger.                                                                     
+file_names.py : constants containing the filenames and paths                                
+
+Pipeline:
+---------
+download_observation.sh : Pre-Processing : Used to download XMM PN and or MOS files.
+filtering.sh            : uses `evselect and tabgtigen' to filter events files.
+lightcurve.sh           : creates .lc using eveselect and does epiclccorr, also does lcstats          
+file_utils.py           : contains a Source() class,  and MOS/PN data transformation routines.        
+fits_extractor.py       : filter ccd events and gtis, also write results to fits file.                
+
+variability_utils.py    : Detection : This contains the bulk of the actual algorithm          
+detector.py             : Detection : Reads in observation and does the detection 
+
+
+Cross-Correlation:
+------------------
+exodus_utils.py                 : functions for cross-correlation                         
+generate_bright_sources_file.py : Used to create bright_sources.csv from XMM_catalogue                        
+remove_bright_sources.py        : Remove detections within 60'' of a bright source.                           
+simbad_subclass.py              : subclassify SIMBAD classifications into one of 7 sub-classifications        
+calc_all_separations.py         : Between 3 EPIC cameras                                  
+detect_corr.py                  : Determine which sources were found in 2 or 3 instruments
+detect_final_corr.py            : Write to master file                                    
+match_with_simbad.py            : SIMBAD, RA & DEC to find 5 closest matches (within 30'')
+match_with_xmm_catalog.py       : Between XMM catalogue                                   
+                                                                                                              
+detect_pn_matches.py            : Counts the number of sources in a .reg file                                 
+pre_light_curve.py              : Counts the number of sources in 3 .reg files                                
+                                                                                                              
+Visualization:
+--------------
+lcurve.py                       : reads .lc bkg and src files and plots the results.                          
+renderer.py                     : Used to plot/show variability plots                                         
+
+Other:
+------
+bright_sources.csv              : Bright Sources csv file (why is this here?)                                 
+```

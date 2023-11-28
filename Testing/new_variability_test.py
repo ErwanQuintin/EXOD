@@ -83,7 +83,7 @@ data_M2 = Table(fits.open(f'{data_path}M2_cleanpattern.fits')[1].data)['X','Y','
 data_EPIC = vstack((data_pn,data_M1,data_M2))
 
 #Choose the time binning, and peak properties
-time_interval=5000
+time_interval=500
 peak_width=250
 amplitude=1e1
 
@@ -117,7 +117,7 @@ k = np.ones((size_mean_box,size_mean_box,1))
 k[int((size_mean_box - 1) / 2), int((size_mean_box - 1) / 2),:]=0
 image = np.sum(cube_EPIC, axis=2)
 threshold=np.nanpercentile(image.flatten(), 95)
-space_mean_nosource = convolve(np.where(np.repeat((image<threshold)[:,:,np.newaxis],28, axis=2),
+space_mean_nosource = convolve(np.where(np.repeat((image<threshold)[:,:,np.newaxis],len(time_windows)-1, axis=2),
                                         cube_EPIC, np.nan), k)#, boundary='extend')
 
 #Compare the total and desourced images

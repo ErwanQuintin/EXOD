@@ -22,103 +22,26 @@ from renderer import *
 from variability_utils import *
 
 parser = argparse.ArgumentParser()
-
 # Path to files
-parser.add_argument(
-    "-path", help="Path to the folder containing the observation files", type=str
-)
-parser.add_argument(
-    "-out",
-    help="Path to the folder where the output files will be stored",
-    default=None,
-    type=str,
-)
+parser.add_argument("-path", help="Path to the folder containing the observation files", type=str)
+parser.add_argument("-out", help="Path to the folder where the output files will be stored", default=None, type=str)
 
 # Variability parameters
-parser.add_argument(
-    "-bs",
-    "--box-size",
-    dest="bs",
-    help="Size of the detection box in pixel^2.\nDefault: 3",
-    default=3,
-    nargs="?",
-    type=int,
-)
-parser.add_argument(
-    "-dl",
-    "--detection-level",
-    dest="dl",
-    help="The number of times the median variability is required to trigger a detection.\nDefault: 10",
-    default=10,
-    nargs="?",
-    type=float,
-)
-parser.add_argument(
-    "-tw",
-    "--time-window",
-    dest="tw",
-    help="The duration of the time windows.\n Default: 100",
-    default=100.0,
-    nargs="?",
-    type=float,
-)
-parser.add_argument(
-    "-gtr",
-    "--good-time-ratio",
-    dest="gtr",
-    help="Ratio of acceptability for a time window. Shall be between 0.0 and 1.0.\nDefault: 1.0",
-    default=1.0,
-    nargs="?",
-    type=float,
-)
-parser.add_argument(
-    "-mta",
-    "--max-threads-allowed",
-    dest="mta",
-    help="Maximal number of CPUs the program is allowed to use.\nDefault: 8",
-    nargs="?",
-    default=8,
-    type=int,
-)
+parser.add_argument("-bs", "--box-size", dest="bs", help="Size of the detection box in pixel^2.\nDefault: 3", default=3, nargs="?", type=int)
+parser.add_argument("-dl", "--detection-level", dest="dl", help="The number of times the median variability is required to trigger a detection.\nDefault: 10", default=10, nargs="?", type=float)
+parser.add_argument("-tw", "--time-window", dest="tw", help="The duration of the time windows.\n Default: 100", default=100.0, nargs="?", type=float)
+parser.add_argument("-gtr", "--good-time-ratio", dest="gtr", help="Ratio of acceptability for a time window. Shall be between 0.0 and 1.0.\nDefault: 1.0", default=1.0, nargs="?", type=float)
+parser.add_argument("-mta", "--max-threads-allowed", dest="mta", help="Maximal number of CPUs the program is allowed to use.\nDefault: 8", nargs="?", default=8, type=int)
 
 # Arguments set by default
-parser.add_argument(
-    "-creator",
-    dest="creator",
-    help="User creating the variability files",
-    nargs="?",
-    default=os.environ["USER"],
-    type=str,
-)
-parser.add_argument(
-    "-obs",
-    "--observation",
-    dest="obs",
-    help="Observation ID",
-    default=None,
-    nargs="?",
-    type=str,
-)
-parser.add_argument(
-    "-inst",
-    "--instrument",
-    dest="inst",
-    help="Type of detector",
-    default="PN",
-    nargs="?",
-    type=str,
-)
+parser.add_argument( "-creator", dest="creator", help="User creating the variability files", nargs="?", default=os.environ["USER"], type=str)
+parser.add_argument( "-obs", "--observation", dest="obs", help="Observation ID", default=None, nargs="?", type=str)
+parser.add_argument( "-inst", "--instrument", dest="inst", help="Type of detector", default="PN", nargs="?", type=str)
 
 # Boolean flags
-parser.add_argument(
-    "--render", help="Plot variability output, produce pdf", action="store_true"
-)
-parser.add_argument(
-    "--ds9", help="Plot variability output in emerging ds9 window", action="store_true"
-)
-parser.add_argument(
-    "--novar", help="Skip variability computation if already done", action="store_true"
-)
+parser.add_argument("--render", help="Plot variability output, produce pdf", action="store_true")
+parser.add_argument("--ds9", help="Plot variability output in emerging ds9 window", action="store_true")
+parser.add_argument("--novar", help="Skip variability computation if already done", action="store_true")
 
 args = parser.parse_args()
 

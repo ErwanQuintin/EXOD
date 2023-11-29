@@ -37,11 +37,13 @@ GTI_FILE_M2 = "M2_gti.fits"
 IMG_FILE_M2 = "M2_image.fits"
 RATE_FILE_M2 = "M2_rate.fits"
 
-# software installation paths
-
+# Software installation paths
+# The SAS_PATH enviroment should be set to sas_19.0.0-Ubuntu18.04/xmmsas_20201028_0905
+# or equivilent (NOTE NO TRAILING /)
 HEADAS = os.environ["HEADAS"]
 EXOD   = os.environ["EXOD"]
-SAS = "/home/erwan/Documents/Softwares/sas_19.0.0-Ubuntu18.04/xmmsas_20201028_0905/setsas.sh"  # "/mnt/data/Maitrayee/EXOD/scripts/setsas.sh"
+SAS_PATH = os.environ["SAS_PATH"]
+SAS = f"{SAS_PATH}/setsas.sh"
 
 # scripts folder
 FOLDER = f"{EXOD}/data"  # this points to the data folder but it called FOLDER?!

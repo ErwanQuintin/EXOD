@@ -38,12 +38,15 @@ IMG_FILE_M2 = "M2_image.fits"
 RATE_FILE_M2 = "M2_rate.fits"
 
 # Software installation paths
-# The SAS_PATH enviroment should be set to sas_19.0.0-Ubuntu18.04/xmmsas_20201028_0905
+# The SAS_DIR enviroment should be set to sas_19.0.0-Ubuntu18.04/xmmsas_20201028_0905
 # or equivilent (NOTE NO TRAILING /)
-HEADAS = os.environ["HEADAS"]
-EXOD   = os.environ["EXOD"]
-SAS_PATH = os.environ["SAS_PATH"]
-SAS = f"{SAS_PATH}/setsas.sh"
+# Also note, that when sasinit is called, this enviroment variable is actually exported again.
+# make sure that it is the same directory as the one in the .sh file, I don't think this should
+# Cause any problems...
+HEADAS  = os.environ["HEADAS"]
+EXOD    = os.environ["EXOD"]
+SAS_DIR = os.environ["SAS_DIR"]
+SAS     = f"{SAS_DIR}/setsas.sh"
 
 # scripts folder
 FOLDER = f"{EXOD}/data"  # this points to the data folder but it called FOLDER?!

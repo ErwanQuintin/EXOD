@@ -14,6 +14,7 @@
 """
 Declaration of the file names handled both by the detector and the renderer
 """
+import os
 
 # Created files
 LOG                 = "log.txt"
@@ -55,10 +56,10 @@ RATE_FILE_M2         = "M2_rate.fits"
 # software installation paths
 
 
-HEADAS = "/home/erwan/Documents/Softwares/heasoft-6.30.1src/heasoft-6.30.1/x86_64-pc-linux-gnu-libc2.27"#"/sasbuild/local/sasbld03n/GNU_CC_CXX_9.2.0/headas/x86_64-pc-linux-gnu-libc2.27"
-SAS    = "/home/erwan/Documents/Softwares/sas_19.0.0-Ubuntu18.04/xmmsas_20201028_0905/setsas.sh"#"/mnt/data/Maitrayee/EXOD/scripts/setsas.sh"
+HEADAS = os.environ["HEADAS"]
+SAS_PATH = os.environ["SAS_PATH"]
+SAS    = f"{SAS_PATH}/setsas.sh"
 
 # scripts folder
-
 FOLDER      = "/mnt/data/Maitrayee/EXOD/data"
 SCRIPTS     = "/mnt/data/Maitrayee/EXOD/scripts"

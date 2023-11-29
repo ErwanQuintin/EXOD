@@ -1,4 +1,7 @@
 import numpy as np
+import subprocess
+
+import file_names
 from logger import logger
 
 class Source:
@@ -63,9 +66,7 @@ class Source:
         command = f"""
         export SAS_ODF={path};
         export SAS_CCF={path}ccf.cif;
-        export HEADAS={FileNames.HEADAS};
-        . $HEADAS/headas-init.sh;
-        . {FileNames.SAS};
+        . {file_names.SAS};
         echo "# Variable source {self.id_src}";
         edet2sky datastyle=user inputunit=raw X={self.rawx} Y={self.rawy} ccd={self.ccd} calinfoset={img} -V 0
         """
@@ -95,11 +96,9 @@ class Source:
         # Equatorial coordinates
         self.ra, self.dec = det2sky[np.where(det2sky == "# RA (deg)   DEC (deg)")[0][0] + 1].split()
 
-        logger.debug("RA = ", self.ra, " DEC = ", self.dec)
+        logger.debug(f"RA = {self.ra} DEC = {self.dec}")
 
         # Sky pixel coordinates
         self.x, self.y = det2sky[np.where(det2sky == "# Sky X        Y pixel")[0][0] + 1].split()
-        logger.debug("x = ", self.x, " Y= ", self.y)
-        logger.debug("raw x = ", self.rawx, " raw x= ", self.rawy)
-
+        logger.debug(f'x = {self.x}, y = {self.y} rawx = {self.rawx}, rawy = {self.rawy}')
 

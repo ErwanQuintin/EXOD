@@ -49,27 +49,13 @@ def variability_computation(gti, time_interval, acceptable_ratio, start_time, en
         list: The matrix V_round.
     """
     logger.debug('Calling variability_computation()...')
-    logger.debug('gti:')
-    logger.debug(gti)
-
-    logger.debug('time_interval:')
-    logger.debug(time_interval)
-
-    logger.debug('acceptable_ratio:')
-    logger.debug(acceptable_ratio)
-
-    logger.debug('start_time:')
-    logger.debug(start_time)
-
-    logger.debug('end_time:')
-    logger.debug(end_time)
-
-    logger.debug('inst:')
-    logger.debug(inst)
-
-    logger.debug('box_size:')
-    logger.debug(box_size)
-
+    logger.debug(f'gti: {gti}')
+    logger.debug(f'time_interval: {time_interval}')
+    logger.debug(f'acceptable_ratio: {acceptable_ratio}')
+    logger.debug(f'start_time: {start_time}')
+    logger.debug(f'end_time:{end_time}')
+    logger.debug(f'inst:{inst}')
+    logger.debug(f'box_size:{box_size}')
     logger.debug('data:')
     logger.debug(data)
 
@@ -506,9 +492,11 @@ def variable_sources_position(variable_areas_matrix, obs, inst, path_out, reg_fi
     )
 
     logger.debug("Filling the source table...")
+    import pdb; pdb.set_trace()
+
+
     for s in sources:
-        import pdb; pdb.set_trace()
-        src = Source()
+        src = Source(id_src=s[0], inst=s[1], ccd=s[2]+1, rawx=s[3], rawy=s[4], rawr=s[5])
         src.sky_coord(path_out, img_file)
 
         src.r = round(src.r, 3)
@@ -537,102 +525,104 @@ def variable_sources_position(variable_areas_matrix, obs, inst, path_out, reg_fi
 
 
 
-    logger.debug(f'Writing header to {best_match_file}')
-    with open(best_match_file, "w+") as f:
-        f.write("OBS_ID,REGION_NUMBER,SIMBAD_MATCH_NO,OBJ_NAME,RA_EXOD,DEC_EXOD,RA_SIM,DEC_SIM,SEP,OBJ_TYPE,INST,DL,GTR,BS,TW\n")
-    
-    logger.debug(f'Writing header to Master_Catalogue.csv')
-    with open('Master_Catalogue.csv', 'w+'): as f:
-        f.write("OBS_ID,REGION_NUMBER,SIMBAD_MATCH_NO,OBJ_NAME,RA_EXOD,DEC_EXOD,RA_SIM,DEC_SIM,SEP,OBJ_TYPE,INST,DL,GTR,BS,TW\n")
-
-
-
-
-
-
-    # Head text
-    text = """# Region file format: DS9 version 4.0 global
-    # XMM-Newton OBSID {0}
-    # Instrument {1}
-    # EXOD variable sources
-    
-    global color=green font="times 8 normal roman"
-    j2000
-    
-    """.format(obs, inst)
-
-    # ds9 text
-
-    for s in source_table:
-        text = text + 'circle {0}, {1}, {2}" # text="{3}"\n'.format(s["RA"], s["DEC"], s["R"], s["ID"])
-        try:
-            custom_simbad = Simbad()
-            custom_simbad.add_votable_fields("otype")
-            simbad_result_table = custom_simbad.query_region(
-                coord.SkyCoord(
-                    ra=s["RA"], dec=s["DEC"], unit=(u.deg, u.deg), frame="fk5"
-                ),
-                radius=0.0083 * u.deg,
-            )
-
-            length = len(simbad_result_table)
-            loop_lenth = 5
-            if length > 5:
-                loop_length = 5
-            else:
-                loop_length = length
-
-            for i in range(loop_length):
-                c1 = coord.SkyCoord(
-                    ra=s["RA"], dec=s["DEC"], unit=(u.deg, u.deg), frame="fk5"
-                )
-                RA_EXOD = s["RA"]
-                DEC_EXOD = s["DEC"]
-                RA = simbad_result_table[i]["RA"]
-                DEC = simbad_result_table[i]["DEC"]
-                OBJ_NAME = simbad_result_table[i]["MAIN_ID"]
-                c2 = SkyCoord(RA, DEC, unit=(u.hourangle, u.deg), frame="icrs")
-                SEP = c1.separation(c2)
-                SEP_ARCSEC = round(SEP.arcsecond, 3)
-                OBJ_TYPE = simbad_result_table[i]["OTYPE"]
-
-                line = """{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14}\n""".format(
-                    obs,
-                    region_number,
-                    i + 1,
-                    OBJ_NAME,
-                    RA_EXOD,
-                    DEC_EXOD,
-                    RA,
-                    DEC,
-                    SEP_ARCSEC,
-                    OBJ_TYPE,
-                    inst,
-                    dl,
-                    gtr,
-                    bs,
-                    tw,
-                )
-                match_file.write(line)
-                master_file.write(line)
-
-        except:
-            pass
-            line = """{0},{1},N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A\n""".format(
-                obs, region_number
-            )
-            match_file.write(line)
-            master_file.write(line)
-            logger.debug(f"Didn't find match for RA=", {s["RA"]}, "DEC=", {s["DEC"]})
-
-        region_number = region_number + 1
-
-    match_file.close()
-    master_file.close()
-
-    # Writing region file
-    reg_f = open(reg_file, "w")
-    reg_f.write(text)
-    reg_f.close()
-
+#    logger.debug(f'Writing header to {best_match_file}')
+#    with open(best_match_file, "w+") as f:
+#        f.write("OBS_ID,REGION_NUMBER,SIMBAD_MATCH_NO,OBJ_NAME,RA_EXOD,DEC_EXOD,RA_SIM,DEC_SIM,SEP,OBJ_TYPE,INST,DL,GTR,BS,TW\n")
+#    
+#    logger.debug(f'Writing header to Master_Catalogue.csv')
+#    with open('Master_Catalogue.csv', 'w+') as f:
+#        f.write("OBS_ID,REGION_NUMBER,SIMBAD_MATCH_NO,OBJ_NAME,RA_EXOD,DEC_EXOD,RA_SIM,DEC_SIM,SEP,OBJ_TYPE,INST,DL,GTR,BS,TW\n")
+#
+#
+#
+#    # Head text
+#    text = """# Region file format: DS9 version 4.0 global
+#    # XMM-Newton OBSID {0}
+#    # Instrument {1}
+#    # EXOD variable sources
+#    
+#    global color=green font="times 8 normal roman"
+#    j2000
+#    
+#    """.format(obs, inst)
+#
+#    # ds9 text
+#    for s in source_table:
+#        logger.debug(s)
+#
+#
+#
+#    for s in source_table:
+#        text = text + 'circle {0}, {1}, {2}" # text="{3}"\n'.format(s["RA"], s["DEC"], s["R"], s["ID"])
+#        try:
+#            custom_simbad = Simbad()
+#            custom_simbad.add_votable_fields("otype")
+#            simbad_result_table = custom_simbad.query_region(
+#                coord.SkyCoord(
+#                    ra=s["RA"], dec=s["DEC"], unit=(u.deg, u.deg), frame="fk5"
+#                ),
+#                radius=0.0083 * u.deg,
+#            )
+#
+#            length = len(simbad_result_table)
+#            loop_lenth = 5
+#            if length > 5:
+#                loop_length = 5
+#            else:
+#                loop_length = length
+#
+#            for i in range(loop_length):
+#                c1 = coord.SkyCoord(
+#                    ra=s["RA"], dec=s["DEC"], unit=(u.deg, u.deg), frame="fk5"
+#                )
+#                RA_EXOD = s["RA"]
+#                DEC_EXOD = s["DEC"]
+#                RA = simbad_result_table[i]["RA"]
+#                DEC = simbad_result_table[i]["DEC"]
+#                OBJ_NAME = simbad_result_table[i]["MAIN_ID"]
+#                c2 = SkyCoord(RA, DEC, unit=(u.hourangle, u.deg), frame="icrs")
+#                SEP = c1.separation(c2)
+#                SEP_ARCSEC = round(SEP.arcsecond, 3)
+#                OBJ_TYPE = simbad_result_table[i]["OTYPE"]
+#
+#                line = """{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14}\n""".format(
+#                    obs,
+#                    region_number,
+#                    i + 1,
+#                    OBJ_NAME,
+#                    RA_EXOD,
+#                    DEC_EXOD,
+#                    RA,
+#                    DEC,
+#                    SEP_ARCSEC,
+#                    OBJ_TYPE,
+#                    inst,
+#                    dl,
+#                    gtr,
+#                    bs,
+#                    tw,
+#                )
+#
+#                with best_match_file
+#                match_file.write(line)
+#                master_file.write(line)
+#
+#        except:
+#            pass
+#            line = """{0},{1},N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A\n""".format(
+#                obs, region_number
+#            )
+#            match_file.write(line)
+#            master_file.write(line)
+#            logger.debug(f"Didn't find match for RA=", {s["RA"]}, "DEC=", {s["DEC"]})
+#
+#        region_number = region_number + 1
+#
+#    match_file.close()
+#    master_file.close()
+#
+#    # Writing region file
+#    reg_f = open(reg_file, "w")
+#    reg_f.write(text)
+#    reg_f.close()
     return source_table

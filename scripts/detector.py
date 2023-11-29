@@ -19,7 +19,7 @@ from file_utils import open_files
 from fits_extractor import *
 from logger import logger
 from renderer import *
-from variability_utils import variability_computation
+from variability_utils import variability_computation, variable_areas_detection, variable_sources_position
 
 parser = argparse.ArgumentParser()
 # Path to files
@@ -73,45 +73,33 @@ if args.inst == "M2":
 
 
 def main_fct():
-    """
-    Main function of the detector
-    """
     logger.info(f'Running detector.py...')
     logger.info('Parsed Arguments:') 
     for k, v in vars(args).items():
         logger.info(f'{k:<10} : {v}')
 
-    
     logger.info('Calling open_files...')
     var_f, reg_f, best_match_f = open_files(args.out)
     logger.info(f'var_f={var_f} reg_f={reg_f}')
 
-
     vf = False
     if args.novar:
-        print(" Checking if variability has been computed.")
+        logger.info(" Checking if variability has been computed.")
         var_f = args.out + FileNames.VARIABILITY
         vf = os.path.isfile(var_f)
         if vf:
-            print(" Using existing variability file {0}".format(var_f))
+            logger.info(f"Using existing variability file {var_f}".format(var_f))
         else:
-            print(" No variability file. Applying detector.")
-    ###
-    # Starting variability computation
-    ###
+            logger.info("No variability file. Applying detector.")
 
     if not args.novar and not vf:
         # Recovering the EVENTS list
         logger.info('Recovering Events list')
-        try:
-            data, header = extraction_photons(args.evts)
-            logger.info(f'len(data)={len(data)}')
-            if args.obs == None:
-                args.obs = header["OBS_ID"]
+        data, header = extraction_photons(args.evts)
+        logger.info(f'len(data)={len(data)}')
+        if args.obs == None:
+            args.obs = header["OBS_ID"]
 
-        except Exception as e:
-            print(" !!!!\nImpossible to extract photons. ABORTING.")
-            exit(-2)
 
         # Parameters ready
         params = {
@@ -174,7 +162,7 @@ def main_fct():
             data_v = M2_config(v_matrix)
             data_vm = np.array(data_v)
 
-        # Applying geometrical transformation
+        logger.info('Applying Geomertrical Transforms...')
         if args.inst == "PN":
             img_v = data_transformation_PN(data_vm, header)
         elif args.inst == "M1" or "M2":
@@ -186,10 +174,11 @@ def main_fct():
         median = np.median(v_matrix)
 
         # Avoiding a too small median value for detection
-        print("\n\tMedian\t\t{0}".format(median))
+        logger.info('Median < 0.75 setting to it to 0.75 (bruh...)')
+        logger.info("\n\tMedian\t\t{0}".format(median))
         if median < 0.75:
             median = 0.75
-            print(" \tMedian switched to 0.75. \n")
+            logger.info(" \tMedian switched to 0.75. \n")
 
         variable_areas = []
 
@@ -197,26 +186,27 @@ def main_fct():
         variable_areas_detection_partial = partial(
             variable_areas_detection, median, args.bs, args.dl, args.inst
         )
-        print("\tBox counts\t{0}".format(args.dl * ((args.bs**2))))
+        logger.info("\tBox counts\t{0}".format(args.dl * ((args.bs**2))))
+
+
         # Performing parallel detection on each CCD
         with Pool(args.mta) as p:
             variable_areas = p.map(variable_areas_detection_partial, v_matrix)
-        sources = variable_sources_position(
-            variable_areas,
-            args.obs,
-            args.inst,
-            args.path,
-            reg_f,
-            log_f,
-            args.img,
-            best_match_f,
-            args.tw,
-            args.dl,
-            args.bs,
-            args.gtr,
-        )
 
-        print("\tNb of sources\t{0}\n".format(len(sources)))
+        sources = variable_sources_position(
+                  variable_areas_matrix=variable_areas,
+                  obs=args.obs,
+                  inst=args.inst,
+                  path_out=args.path,
+                  reg_file=reg_f,
+                  img_file=args.img,
+                  best_match_file=best_match_f,
+                  bs=args.bs,
+                  dl=args.dl,
+                  tw=args.tw,
+                  gtr=args.gtr
+                  )
+        logger.debug(f'N sources = {len(sources)}')
 
         # Writing data to fits file
         fits_writer(img_v, sources, args.img, params, var_f)
@@ -241,7 +231,6 @@ def main_fct():
 
 
     logger.info('Finished Execution')
-    log_f.close()
 
 
 if __name__ == "__main__":

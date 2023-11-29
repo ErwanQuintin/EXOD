@@ -35,56 +35,11 @@ def open_files(folder_name):
     if folder_name[-1] != "/":
         folder_name += "/"
 
-    # Creating the folder if needed
-    if not os.path.exists(folder_name):
-        try:
-            os.makedirs(folder_name)
-        except:
-            print("Error in creating output directory.\nABORTING", file=sys.stderr)
-            exit(-1)
+    os.makedirs(folder_name, exist_ok=True)
 
-    var_file = None
-    reg_file = None
-    best_match_file = None
-
-    # Creating the file to store variability per pixel
-    try:
-        var_file = folder_name + FileNames.VARIABILITY
-
-    except IOError as e:
-        print(
-            "Error in creating {0}.\nABORTING".format(FileNames.VARIABILITY),
-            file=sys.stderr,
-        )
-        print(e, file=sys.stderr)
-        print_help()
-        exit(-1)
-
-    # Creating the region file to store the position of variable sources
-    try:
-        reg_file = folder_name + FileNames.REGION
-
-    except IOError as e:
-        print(
-            "Error in creating {0}.\nABORTING".format(FileNames.REGION), file=sys.stderr
-        )
-        print(e, file=sys.stderr)
-        print_help()
-        exit(-1)
-
-        # Creating the best match file to store the best matches from SIMBAD
-    try:
-        best_match_file = folder_name + FileNames.BEST_MATCH
-
-    except IOError as e:
-        print(
-            "Error in creating {0}.\nABORTING".format(FileNames.BEST_MATCH),
-            file=sys.stderr,
-        )
-        print(e, file=sys.stderr)
-        print_help()
-        exit(-1)
-
+    var_file = folder_name + FileNames.VARIABILITY
+    reg_file = folder_name + FileNames.REGION
+    best_match_file = folder_name + FileNames.BEST_MATCH
     return var_file, reg_file, best_match_file
 
 
@@ -139,118 +94,6 @@ def read_tws_from_file(file_path, comment_token="#", separator=";"):
 
 
 ########################################################################
-
-
-class Source(object):
-    """
-    Datastructure providing easy storage for detected sources.
-
-    Attributes:
-    id_src:  The identifier number of the source
-    inst:    The type of CCD
-    ccd:     The CCD where the source was detected at
-    rawx:    The x coordinate on the CCD
-    rawy:    The y coordinate on the CCD
-    r:       The radius of the variable area
-    x:       The x coordinate on the output image
-    y:       The y coordinate on the output image
-    """
-
-    def __init__(self, src):
-        """
-        Constructor for Source class. Computes the x and y attributes.
-        @param src : source, output of variable_sources_position
-            id_src:  The identifier number of the source
-            inst:    The type of CCD
-            ccd:     The CCD where the source was detected at
-            rawx:    The x coordinate on the CCD
-            rawy:    The y coordinate on the CCD
-            r:       The raw pixel radius of the detected variable area
-        """
-        super(Source, self).__init__()
-
-        self.id_src = src[0]
-        self.inst = src[1]
-        self.ccd = src[2]
-        self.rawx = src[3]
-        self.rawy = src[4]
-        self.rawr = src[5]
-        self.vcount = src[6]
-        self.x = None
-        self.y = None
-        self.skyr = self.rawr * 64
-        self.ra = None
-        self.dec = None
-        self.r = self.skyr * 0.05  # arcseconds
-        self.var_rawx = src[3] + 3  # 1.5 # 3
-        self.var_rawy = src[4] + 3  # 1.5 # 3
-        self.var_rawr = src[5]
-        self.var_x = None
-        self.var_y = None
-        self.var_skyr = self.rawr * 64
-        self.var_ra = None
-        self.var_dec = None
-        self.var_r = self.skyr * 0.05  # arcseconds
-
-    def sky_coord(self, path, img):
-        """
-        Calculate sky coordinates with the sas task edet2sky.
-        Return x, y, ra, dec
-        """
-        print(
-            "file util call x= ", self.rawx, " Y = ", self.rawy, " CCD num = ", self.ccd
-        )
-        # Launching SAS commands
-        command = f"""
-        export SAS_ODF={path};
-        export SAS_CCF={path}ccf.cif;
-        export HEADAS={FileNames.HEADAS};
-        . $HEADAS/headas-init.sh;
-        . {FileNames.SAS};
-        echo "# Variable source {self.id_src}";
-        edet2sky datastyle=user inputunit=raw X={self.rawx} Y={self.rawy} ccd={self.ccd} calinfoset={img} -V 0
-        """
-
-        # Running command
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-
-        # Extracting the output
-        try:
-            outs, errs = process.communicate(timeout=15)
-        except TimeoutExpired:
-            process.kill()
-            outs, errs = process.communicate()
-
-        # Converting output in utf-8
-        textout = outs.decode("utf8")
-        # Splitting for each line
-        txt = textout.split("\n")
-        # Converting in numpy array
-        det2sky = np.array(txt)
-        print(det2sky)
-
-        # Writing the results in log file
-        # Finding the beginning of the text to write in log
-        deb = (
-            np.where(
-                det2sky == "Do not forget to define SAS_CCFPATH, SAS_CCF and SAS_ODF"
-            )[0][0]
-            + 2
-        )
-
-        # Equatorial coordinates
-        self.ra, self.dec = det2sky[
-            np.where(det2sky == "# RA (deg)   DEC (deg)")[0][0] + 1
-        ].split()
-
-        print("RA = ", self.ra, " DEC = ", self.dec)
-
-        # Sky pixel coordinates
-        self.x, self.y = det2sky[
-            np.where(det2sky == "# Sky X        Y pixel")[0][0] + 1
-        ].split()
-        print("x = ", self.x, " Y= ", self.y)
-        print("raw x = ", self.rawx, " raw Y= ", self.rawy)
 
 
 ########################################################################

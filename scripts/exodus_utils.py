@@ -11,6 +11,8 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Column, Table
 
+from logger import logger
+
 
 def check_correlation(src_1, src_2, corr_tab, sep_cutoff):
     """
@@ -156,7 +158,6 @@ def check_multiple_sources(src):
     @param  src:   The astropy source table
     @return: The astropy source table without multiple sources
     """
-    print("here at check_multiple_sources")
     src.sort(["R"])  # table sorted in radius, from the largest to the shortest
     src.reverse()  # in order to eliminate sources with shorter radius
 
@@ -167,8 +168,11 @@ def check_multiple_sources(src):
             c2 = SkyCoord(src["RA"][j], src["DEC"][j], frame="fk5", unit="deg")
             sep = c1.separation(c2)
             # if sep.arcsecond < (src_M2['R'][i]-(src_M2['R'][j]/2)):
+            logger.debug(f'c1={c1}, c2={c2}, sep={sep}')
             if sep.arcsecond < (src["R"][i]):
+                logger.debug(f'seperation in arcseconds ({sep.arcsecond}) < {src["R"][i]}, appending to multiple')
                 multiple.append(j)
+
 
     src.remove_rows(multiple)  # removing multiple sources
     src.sort(["ID"])

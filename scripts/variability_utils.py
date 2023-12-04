@@ -21,14 +21,7 @@ from scipy.stats import linregress
 
 from exodus_utils import check_multiple_sources
 from source import Source
-#from file_utils import
 from logger import logger
-
-########################################################################
-#                                                                      #
-# Variability computation: procedure count_events                      #
-#                                                                      #
-########################################################################
 
 
 def variability_computation(gti, time_interval, acceptable_ratio, start_time, end_time, inst, box_size, data):
@@ -48,7 +41,6 @@ def variability_computation(gti, time_interval, acceptable_ratio, start_time, en
     Returns:
         list: The matrix V_round.
     """
-    logger.debug('Calling variability_computation()...')
     logger.debug(f'gti: {gti}')
     logger.debug(f'time_interval: {time_interval}')
     logger.debug(f'acceptable_ratio: {acceptable_ratio}')
@@ -130,13 +122,18 @@ def variability_computation(gti, time_interval, acceptable_ratio, start_time, en
     if nbr_events < 0.5 * (xMax * yMax * len(time_windows)):
         # This creates a 2D matix of 1D sparse (time) vectors, built by np.histogram on the photon times
         # This takes a long time
+        logger.debug('Getting Counted events')
         counted_events = np.array([[csr_matrix(np.histogram(grouped_events[x][y], time_windows)[0][cdt] / projection_ratio[cdt]) for y in range(yMax)] for x in range(xMax)])
+        logger.debug('Calculating Maxes')
         image_max    = np.array([[c.max() for c in column] for column in counted_events])
+        logger.debug('Calculating minimums')
         image_min    = np.array([[c.min() for c in column] for column in counted_events])
+        logger.debug('Calculating medians')
         image_median = np.array([[c.mean() for c in column] for column in counted_events])
 
-        logger.debug('counted_events:')
-        logger.debug(counted_events)
+
+        #logger.debug('counted_events:')
+        #logger.debug(counted_events)
 
         logger.debug('image_max:')
         logger.debug(image_max)
@@ -155,12 +152,7 @@ def variability_computation(gti, time_interval, acceptable_ratio, start_time, en
         image_median = np.median(counted_events, axis=2)
 
     # Computing variability
-    V_mat = np.where(
-        image_median > 0,
-        np.max((image_max - image_median, image_median - image_min)) / image_median,
-        image_max,
-    )
-
+    V_mat = np.where(image_median > 0, np.max((image_max - image_median, image_median - image_min)) / image_median, image_max)
     return V_mat
 
 
@@ -173,12 +165,20 @@ def variability_computation(gti, time_interval, acceptable_ratio, start_time, en
 
 def box_computations(variability_matrix, x, y, box_size, inst):
     """
-    Function summing the variability values into a box.
-    @param variability_matrix:  The V round matrix
-    @param x:   The x coordinate of the top-left corner of the box
-    @param y:   The y coordinate of the top-left corner of the box
-    @param box_size:   The length of a side of a box
-    @return: The sum of the variability for each pixel of the box
+    Sum the variability values within a specified box.
+
+    Parameters:
+    - variability_matrix (list of lists): The V round matrix.
+    - x (int): The x-coordinate of the top-left corner of the box.
+    - y (int): The y-coordinate of the top-left corner of the box.
+    - box_size (int): The length of a side of the box.
+    - inst (str): The instrument type ("PN", "M1", or "M2").
+
+    Returns:
+    int: The sum of the variability for each pixel within the box.
+
+    Raises:
+    AssertionError: If the box is out of the limits of the CCD.
     """
     if inst == "PN":
         assert x <= 63 - box_size
@@ -189,7 +189,6 @@ def box_computations(variability_matrix, x, y, box_size, inst):
     # Exception raised if box out of the limits of the CCD
 
     cpt = 0
-
     for i in range(x, x + box_size):
         for j in range(y, y + box_size):
             cpt += variability_matrix[x][y]
@@ -277,8 +276,8 @@ def remove_readout_streak(input_table):
             y_new.append((slope * x_new[0]) + intercept)
             y_new.append((slope * x_new[1]) + intercept)
             break
-    logger.debug(fit_slope)
-    logger.debug(fit_intercept)
+    logger.debug(f'fit_slope={fit_slope}')
+    logger.debug(f'fit_intercept={fit_intercept}')
     if (fit_slope != -100) and (fit_intercept != -100):
         logger.debug("found hit")
 
@@ -344,27 +343,24 @@ def remove_readout_streak(input_table):
     return result_table
 
 
-########################################################################
-#                                                                      #
-#   Variable areas into a variability_matrix                           #
-#                                                                      #
-########################################################################
 
-
-def variable_areas_detection(
-    lower_limit, box_size, detection_level, inst, variability_matrix
-):
+def variable_areas_detection(lower_limit, box_size, detection_level, inst, variability_matrix):
     """
-    Function detecting variable areas into a variability_matrix.
-    @param lower_limit:         The lower_limit value is the smallest variability value needed to consider a pixel variable
-    @param box_size:            The size of the box (optional, default = 3)
-    @param detection_level:     A factor for the limit of detection
-    @param variability_matrix:  The matrix returned by variability_calculation
-    @return: A list of sets of coordinates for each area detected as variable
-    """
+    Detects variable areas in a variability matrix.
 
+    Args:
+        lower_limit (float): The smallest variability value needed to consider a pixel variable.
+        box_size (int, optional): The size of the box (default is 3).
+        detection_level (float): A factor for the limit of detection.
+        inst: Unused parameter, reserved for future use.
+        variability_matrix (list of lists): The matrix returned by variability_calculation.
+
+    Returns:
+        list of sets: A list of sets of coordinates for each area detected as variable.
+    """
+    logger.debug(f'lower_limit={lower_limit} box_size={box_size} detection_level={detection_level} inst={inst}')
+    
     output = []
-
     box_count = 0
 
     for i in range(len(variability_matrix) - box_size):
@@ -376,15 +372,13 @@ def variable_areas_detection(
             # If there's nothing into the box, it is completely skipped
             if box_count == 0:
                 j += box_size
-
             else:
-                if box_count > detection_level * ((box_size**2) * lower_limit):
-                    output = __add_to_detected_areas(
-                        i, j, box_size, output, variability_matrix
-                    )
+                box_count_threshold = detection_level * ((box_size**2) * lower_limit)
+                logger.debug(f'i={i} j={j} box_count:{box_count} box_count_threshold={box_count_threshold}')            
+                if box_count > box_count_threshold:
+                    output = __add_to_detected_areas(i, j, box_size, output, variability_matrix)
                     m += 1
                 j += 1
-
     return output
 
 def variable_sources_position(variable_areas_matrix, obs, inst, path_out, reg_file, img_file, best_match_file, bs, dl, tw, gtr):
@@ -492,9 +486,6 @@ def variable_sources_position(variable_areas_matrix, obs, inst, path_out, reg_fi
     )
 
     logger.debug("Filling the source table...")
-    import pdb; pdb.set_trace()
-
-
     for s in sources:
         src = Source(id_src=s[0], inst=s[1], ccd=s[2]+1, rawx=s[3], rawy=s[4], rawr=s[5])
         src.sky_coord(path_out, img_file)

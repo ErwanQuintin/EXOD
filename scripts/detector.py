@@ -15,8 +15,9 @@ from multiprocessing import Pool
 import numpy as np
 
 import file_names as FileNames
-from file_utils import open_files 
-from fits_extractor import *
+from file_utils import open_files
+from xmm_transforms import PN_config, M1_config, M2_config, data_transformation_PN, data_transformation_MOS
+from fits_extractor import extraction_photons, get_gti_from_file
 from logger import logger
 from renderer import *
 from variability_utils import variability_computation, variable_areas_detection, variable_sources_position
@@ -51,9 +52,7 @@ if args.path[-1] != "/":
 if args.out != None and args.out[-1] != "/":
     args.out = args.out + "/"
 if args.out == None:
-    args.out = args.path + "{}_{}_{}_{}_{}/".format(
-        int(args.dl), int(args.tw), args.bs, args.gtr, args.inst
-    )
+    args.out = args.path + "{}_{}_{}_{}_{}/".format(int(args.dl), int(args.tw), args.bs, args.gtr, args.inst)
 
 if args.inst == "PN":
     args.evts = args.path + FileNames.CLEAN_FILE_PN
@@ -80,11 +79,11 @@ def main_fct():
 
     logger.info('Calling open_files...')
     var_f, reg_f, best_match_f = open_files(args.out)
-    logger.info(f'var_f={var_f} reg_f={reg_f}')
+    logger.info(f'var_f={var_f} reg_f={reg_f} best_match_f={best_match_f}')
 
     vf = False
     if args.novar:
-        logger.info(" Checking if variability has been computed.")
+        logger.info("Checking if variability has been computed.")
         var_f = args.out + FileNames.VARIABILITY
         vf = os.path.isfile(var_f)
         if vf:
@@ -100,7 +99,6 @@ def main_fct():
         if args.obs == None:
             args.obs = header["OBS_ID"]
 
-
         # Parameters ready
         params = {
             "CREATOR": args.creator,
@@ -113,21 +111,17 @@ def main_fct():
             "BS": args.bs,
         }
 
-        logger.info('Extracting GTI list...')
-        gti_list = extraction_deleted_periods(args.gti)
+        logger.info(f'Extracting GTI list from {args.gti}...')
+        gti_list = get_gti_from_file(args.gti)
         logger.info(f'gti_list={gti_list}')
 
-
-        # Computation of initial and final time
         logger.info('Getting observation initial and final times...')
         t0_observation = min([evt["TIME"] for ccd in data for evt in ccd])
         tf_observation = max([evt["TIME"] for ccd in data for evt in ccd])
-        logger.info(f't0_observation={t0_observation} tf_observation={tf_observation}')
+        logger.info(f't0_observation={t0_observation} tf_observation={tf_observation} t_diff={tf_observation - t0_observation}')
 
         logger.info('Computing Variability')
-
         v_matrix = []
-
         for d in data: 
             v = variability_computation(gti=gti_list,
                                     time_interval=args.tw,
@@ -139,7 +133,6 @@ def main_fct():
                                     data=d)
             v_matrix.append(v)
  
-
         # Checking data mode acquisition
         submode = header["SUBMODE"]
 
@@ -148,51 +141,53 @@ def main_fct():
             data_v = PN_config(v_matrix)
             data_v = np.array(data_v)
             if submode == "PrimeLargeWindow":
+                logger.info('Prime Large Window Mode, cropping data_v')
                 data_vm = data_v[:, 100:300]
             elif submode == "PrimeSmallWindow":
+                logger.info('Prime Small Window Mode, cropping data_v')
                 data_vm = data_v[128:192, 200:264]
             else:
+                logger.info(f'{submode}={submode}, no correction applied')
                 data_vm = data_v
 
         elif args.inst == "M1":
             data_v = M1_config(v_matrix)
             data_vm = np.array(data_v)
-
         elif args.inst == "M2":
             data_v = M2_config(v_matrix)
             data_vm = np.array(data_v)
+            
+        
 
         logger.info('Applying Geomertrical Transforms...')
         if args.inst == "PN":
             img_v = data_transformation_PN(data_vm, header)
         elif args.inst == "M1" or "M2":
             img_v = data_transformation_MOS(data_vm, header)
-            # print ("m1 here 2")
 
-        logger.info('Detecting Variable Source')
+        logger.info('Converting v_matrix to array')
         v_matrix = np.array(v_matrix)
+        logger.info('Calculating Medium of v_matrix')
         median = np.median(v_matrix)
 
-        # Avoiding a too small median value for detection
-        logger.info('Median < 0.75 setting to it to 0.75 (bruh...)')
-        logger.info("\n\tMedian\t\t{0}".format(median))
+        logger.info(f'Median = {median}')
         if median < 0.75:
             median = 0.75
-            logger.info(" \tMedian switched to 0.75. \n")
+            logger.info(f'Median = {median} < 0.75 setting to it to 0.75 (i hate it)')
 
+
+        # Calculate Variable Areas for each CCD
+        logger.info('Detecting Variable Areas')
         variable_areas = []
-
-        # Currying the function for the pool of threads
-        variable_areas_detection_partial = partial(
-            variable_areas_detection, median, args.bs, args.dl, args.inst
-        )
-        logger.info("\tBox counts\t{0}".format(args.dl * ((args.bs**2))))
-
-
-        # Performing parallel detection on each CCD
-        with Pool(args.mta) as p:
-            variable_areas = p.map(variable_areas_detection_partial, v_matrix)
-
+        for v in v_matrix:
+            va = variable_areas_detection(lower_limit=median,
+                                          box_size=args.bs,
+                                          detection_level=args.dl,
+                                          inst=args.inst,
+                                          variability_matrix=v)
+            variable_areas.append(va)
+        
+        # Calculate Position of Variable Sources
         sources = variable_sources_position(
                   variable_areas_matrix=variable_areas,
                   obs=args.obs,

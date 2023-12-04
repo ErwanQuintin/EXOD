@@ -59,7 +59,7 @@ class Source:
         Calculate sky coordinates with the sas task edet2sky.
         Return x, y, ra, dec
         """
-        logger.debug("file util call x= ", self.rawx, " Y = ", self.rawy, " CCD num = ", self.ccd)
+        logger.debug(f"file util call rawx = {self.rawx} rawy = {self.rawy} ccd = {self.ccd}")
 
         # Launching SAS commands
 

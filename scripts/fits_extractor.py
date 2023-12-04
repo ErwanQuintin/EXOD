@@ -41,9 +41,7 @@ def extraction_photons(events_file):
     events_filtered = [np.array(ccd_events) for ccd_events in events_filtered]
 
     # Then we sort the events of each CCDs in chronological order
-    events_filtered_sorted = [
-        ccd_events[np.argsort(ccd_events["TIME"])] for ccd_events in events_filtered
-    ]
+    events_filtered_sorted = [ccd_events[np.argsort(ccd_events["TIME"])] for ccd_events in events_filtered]
     return events_filtered_sorted, header
 
 
@@ -63,15 +61,15 @@ def extraction_info(events_file):
 ########################################################################
 
 
-def extraction_deleted_periods(gti_file):
+def get_gti_from_file(gti_file):
     """
     Function extracting the G round list from its Fits file.
     @param gti_file: The gti file
     @return: The G round list
     @raise Exception: An exception from astropy if something went wrong
     """
+    logger.debug(f'Getting GTIs from file={gti_file}')
     hdulist = fits.open(gti_file)
-
     return hdulist[1].data
 
 

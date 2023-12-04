@@ -17,7 +17,7 @@ import numpy as np
 import file_names as FileNames
 from file_utils import open_files
 from xmm_transforms import PN_config, M1_config, M2_config, data_transformation_PN, data_transformation_MOS
-from fits_extractor import extraction_photons, get_gti_from_file
+from fits_extractor import load_event_file, split_events_by_CCD, get_gti_from_file
 from logger import logger
 from renderer import *
 from variability_utils import variability_computation, variable_areas_detection, variable_sources_position
@@ -36,7 +36,6 @@ parser.add_argument("-mta", "--max-threads-allowed", dest="mta", help="Maximal n
 
 # Arguments set by default
 parser.add_argument( "-creator", dest="creator", help="User creating the variability files", nargs="?", default=os.environ["USER"], type=str)
-parser.add_argument( "-obs", "--observation", dest="obs", help="Observation ID", default=None, nargs="?", type=str)
 parser.add_argument( "-inst", "--instrument", dest="inst", help="Type of detector", default="PN", nargs="?", type=str)
 
 # Boolean flags
@@ -93,32 +92,17 @@ def main_fct():
 
     if not args.novar and not vf:
         # Recovering the EVENTS list
-        logger.info('Recovering Events list')
-        data, header = extraction_photons(args.evts)
-        logger.info(f'len(data)={len(data)}')
-        if args.obs == None:
-            args.obs = header["OBS_ID"]
-
-        # Parameters ready
-        params = {
-            "CREATOR": args.creator,
-            "DATE": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
-            "OBS_ID": args.obs,
-            "INST": args.inst,
-            "TW": args.tw,
-            "GTR": args.gtr,
-            "DL": args.dl,
-            "BS": args.bs,
-        }
-
-        logger.info(f'Extracting GTI list from {args.gti}...')
+        events, header = load_event_file(args.evts)
+        data = split_events_by_CCD(events)
+        obsid = header["OBS_ID"]
         gti_list = get_gti_from_file(args.gti)
         logger.info(f'gti_list={gti_list}')
 
-        logger.info('Getting observation initial and final times...')
-        t0_observation = min([evt["TIME"] for ccd in data for evt in ccd])
-        tf_observation = max([evt["TIME"] for ccd in data for evt in ccd])
-        logger.info(f't0_observation={t0_observation} tf_observation={tf_observation} t_diff={tf_observation - t0_observation}')
+        t0_observation = min(events["TIME"])
+        tf_observation = max(events["TIME"])
+        te_observation = tf_observation - t0_observation
+        logger.info(f't0_observation={t0_observation} tf_observation={tf_observation} te_observation={te_observation}')
+
 
         logger.info('Computing Variability')
         v_matrix = []
@@ -159,11 +143,12 @@ def main_fct():
             
         
 
-        logger.info('Applying Geomertrical Transforms...')
+        logger.info('Applying geometrical Transforms...')
         if args.inst == "PN":
             img_v = data_transformation_PN(data_vm, header)
         elif args.inst == "M1" or "M2":
             img_v = data_transformation_MOS(data_vm, header)
+
 
         logger.info('Converting v_matrix to array')
         v_matrix = np.array(v_matrix)
@@ -190,7 +175,7 @@ def main_fct():
         # Calculate Position of Variable Sources
         sources = variable_sources_position(
                   variable_areas_matrix=variable_areas,
-                  obs=args.obs,
+                  obs=obsid,
                   inst=args.inst,
                   path_out=args.path,
                   reg_file=reg_f,
@@ -204,6 +189,17 @@ def main_fct():
         logger.debug(f'N sources = {len(sources)}')
 
         # Writing data to fits file
+        params = {
+            "CREATOR": args.creator,
+            "DATE": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+            "OBS_ID": obsid,
+            "INST": args.inst,
+            "TW": args.tw,
+            "GTR": args.gtr,
+            "DL": args.dl,
+            "BS": args.bs,
+        }
+
         fits_writer(img_v, sources, args.img, params, var_f)
 
     # Plotting variability

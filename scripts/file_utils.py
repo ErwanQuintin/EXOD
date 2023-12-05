@@ -20,10 +20,12 @@ def open_files(folder_name):
     if folder_name[-1] != "/":
         folder_name += "/"
 
+    logger.info(f"Creating {folder_name} if it doesn't exist...")
     os.makedirs(folder_name, exist_ok=True)
 
     var_file = folder_name + FileNames.VARIABILITY
     reg_file = folder_name + FileNames.REGION
     best_match_file = folder_name + FileNames.BEST_MATCH
+    logger.info(f'var_file={var_file} reg_file={reg_file} best_match_file={best_match_file}')
     return var_file, reg_file, best_match_file
 

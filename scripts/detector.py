@@ -75,10 +75,7 @@ def main_fct():
     logger.info('Parsed Arguments:') 
     for k, v in vars(args).items():
         logger.info(f'{k:<10} : {v}')
-
-    logger.info('Calling open_files...')
     var_f, reg_f, best_match_f = open_files(args.out)
-    logger.info(f'var_f={var_f} reg_f={reg_f} best_match_f={best_match_f}')
 
     vf = False
     if args.novar:
@@ -91,18 +88,22 @@ def main_fct():
             logger.info("No variability file. Applying detector.")
 
     if not args.novar and not vf:
-        # Recovering the EVENTS list
         events, header = load_event_file(args.evts)
         data = split_events_by_CCD(events)
+
+        # Get information from Header
         obsid = header["OBS_ID"]
+        submode = header["SUBMODE"]
+
+        # Get information from eventlist
+        t0 = min(events["TIME"])
+        tf = max(events["TIME"])
+        te = tf - t0
+        logger.info(f't0={t0} tf={tf} te={te}')
+
+        # Get good time intervals
         gti_list = get_gti_from_file(args.gti)
         logger.info(f'gti_list={gti_list}')
-
-        t0_observation = min(events["TIME"])
-        tf_observation = max(events["TIME"])
-        te_observation = tf_observation - t0_observation
-        logger.info(f't0_observation={t0_observation} tf_observation={tf_observation} te_observation={te_observation}')
-
 
         logger.info('Computing Variability')
         v_matrix = []
@@ -110,16 +111,13 @@ def main_fct():
             v = variability_computation(gti=gti_list,
                                     time_interval=args.tw,
                                     acceptable_ratio=args.gtr,
-                                    start_time=t0_observation,
-                                    end_time=tf_observation,
+                                    start_time=t0,
+                                    end_time=tf,
                                     inst=args.inst,
                                     box_size=args.bs,
                                     data=d)
             v_matrix.append(v)
  
-        # Checking data mode acquisition
-        submode = header["SUBMODE"]
-
         # Applying CCD and Mode configuration
         if args.inst == "PN":
             data_v = PN_config(v_matrix)
@@ -141,8 +139,6 @@ def main_fct():
             data_v = M2_config(v_matrix)
             data_vm = np.array(data_v)
             
-        
-
         logger.info('Applying geometrical Transforms...')
         if args.inst == "PN":
             img_v = data_transformation_PN(data_vm, header)

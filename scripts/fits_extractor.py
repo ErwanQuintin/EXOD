@@ -17,22 +17,27 @@ from logger import logger
 ########################################################################
 
 
-def extraction_photons(events_file):
+def load_event_file(event_file):
     """
-    Function extracting the E round list from its FITS events file.
-    It alse returns the header information
-    @param events_file: The events FITS file
-    @return: The E round list
-    @return: The events file header
-    @return maximum, minimum
-    @raise Exception: An exception from astropy if something went wrong
+    read event file and return events and header
     """
-    logger.debug('calling extraction_photons()')
-    logger.debug(f'events_file={events_file}')
-
-    hdulist = fits.open(events_file)
+    hdulist = fits.open(event_file)
     events = hdulist[1].data
     header = hdulist[1].header
+    return events, header
+
+def split_events_by_CCD(events):
+    """
+    Obtain the events list split by each CCD.
+
+    Parameters
+    ----------
+    events : events list obtained from load_event_file
+
+    Returns
+    -------
+    events_filtered_sorted : events lists split by CCD
+    """
 
     # We will make use of the fact that the events file is already sorted by CCDs
     # First we split the events file by CCDs by retrieving the indices where the CCD# changes
@@ -42,7 +47,7 @@ def extraction_photons(events_file):
 
     # Then we sort the events of each CCDs in chronological order
     events_filtered_sorted = [ccd_events[np.argsort(ccd_events["TIME"])] for ccd_events in events_filtered]
-    return events_filtered_sorted, header
+    return events_filtered_sorted
 
 
 ########################################################################
